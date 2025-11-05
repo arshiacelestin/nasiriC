@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta id="uid_n" content="<%= user._id %>">
+    <title>پنل ارتباطات</title>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-icon {
+            color: #e0e0e0;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Layout */
+        .main {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .feed-section {
+            flex: 2;
+        }
+
+        .sidebar {
+            flex: 1;
+            max-width: 350px;
+        }
+
+        /* Create Post */
+        .create-post {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .post-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            color: #e0e0e0;
+            resize: none;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .post-input::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-btn {
+            background: none;
+            border: none;
+            color: #4ecdc4;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .post-btn:hover {
+            color: #45b7d1;
+            transform: scale(1.1);
+        }
+
+        .share-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Posts */
+        .post {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        .post-content {
+            padding: 0 20px 15px;
+        }
+
+        .post-text {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .post-media {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            color: #4ecdc4;
+        }
+
+        .action-btn.liked {
+            color: #ff6b6b;
+        }
+
+        /* Chat Sidebar */
+        .chat-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-item.active {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-preview {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: rgba(224, 224, 224, 0.4);
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid #1a1a2e;
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            overflow-y: auto;
+            max-height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            z-index: 1001;
+            flex-direction: column;
+        }
+
+        .chat-modal.active {
+            display: flex;
+        }
+
+        .chat-modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: #e0e0e0;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4ecdc4;
+        }
+
+        .profile-bio {
+            font-size: 14px;
+            color: rgba(224, 224, 224, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                max-width: none;
+            }
+            
+            .chat-modal {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 4px;
+        }
+    </style>
+
+    <meta id="user" content="<%= user._id %>">
+
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">ILOOR</div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main">
+            <!-- Feed Section -->
+            <div class="feed-section">
+                <!-- Create Post -->
+                <div class="create-post">
+                    <textarea class="post-input" placeholder="پیام خود را با ما به اشتراک بگذارید..." rows="3" id="postInput"></textarea>
+                    <div class="post-actions">
+                        <div class="post-buttons">
+                            <button class="post-btn">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="post-btn">
+                                <i class="fas fa-poll"></i>
+                            </button>
+                            <button class="post-btn">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                        <button class="share-btn" id="sendMessage" style="text-align: center;">ارسال پیام به ادمین</button>
+                    </div>
+                </div>
+
+                <!-- Posts Feed -->
+                <div id="postsFeed">
+                    <div class="post">
+                            <div class="post-header" style="float: right;">
+                                <div class="post-user-info"">
+                                    <div class="username">تیم ادمین ها</div>
+                                </div>
+                                <div class="avatar">A</div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <div class="post-content" style="float: right;">
+                                <div class="col-lg-6">
+                                    <video class="col-lg-6" src="/first training video.mp4" style="border: 1px solid black;border-radius: 8px;width: 449px;height: 449px;"></video>
+                                </div>
+                                <span class="col-lg-6">
+                                    اسثخیهسخثابسخهثباسخهثباسخهثبا
+                                    ساسهخثابسهثابسخهثابهخسثابخهسه
+                                    اسثخبهاسثهخبسایخهباسثخهبهثابه
+                                </span>
+                            </div>
+                        </div>
+                    <% for(let i = 0;i < notifs.length;i++) { %>
+                        <div class="post">
+                            <div class="post-header" style="float: right;">
+                                <div class="post-user-info"">
+                                    <div class="username"><%= notifs[i].publisher_name %></div>
+                                </div>
+                                <div class="avatar"><%= notifs[i].uploader_name[0] %></div>
+                            </div>
+                            <div class="col-lg-12"></div>
+                            <div class="post-content" style="float: right;">
+                                <div class="post-text"><%= notifs[i].text %></div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar"><%= user.username[0].toUpperCase() %></div>
+                    <div class="profile-name"><%= user.username %></div>
+                    <div class="profile-bio">درگاه ارتباطی با ادمین ها</div>
+                </div>
+
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-header" style="text-align: right;">پیام ها</div>
+                    <div class="chat-list">
+                            <div class="chat-item active" id="chatWithAdmin">
+                                <div style="position: relative;">
+                                    <div class="avatar" style="width: 35px; height: 35px; font-size: 14px;"><%= user.username[0] %></div>
+                                    <div class="online-indicator"></div>
+                                </div>
+                                <div class="chat-info">
+                                    <div class="chat-name"><%= user.username %></div>
+                                    <div class="chat-preview"><%= ((messages.length > 0) ? messages[messages.length-1].report : 'پیامی موجود نیست')%></div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="chat-sidebar">
+                    <div class="chat-header" style="text-align: right;">
+                        ارسال اطلاعات
+                    </div>
+                    <div class="char-list" style="padding: 20px;">
+                        <h3>
+                            اطلاعات خود را اینجا وارد کنید                            
+                        </h2>
+                        <form action="" method="get" class="form-group">
+                            <div class="col-lg-12">
+                                <div class="col-lg-2">
+                                    <label for="info-a">اطلاعات A</label>
+                                </div>
+                                <div class="col-lg-10">
+                                    <textarea name="info-a" id="info-a" class="form-control" autocomplete="off"></textarea>
+                                </div>
+                            </div>
+                            <br><br><br>
+                            <div class="col-lg-12">
+                                <div class="col-lg-2">
+                                <label for="info-b">
+                                    اطلاعات B
+                                </label>
+                            </div>
+                            <div class="col-lg-10">
+                                <textarea name="info-b" id="info-b" class="form-control" autocomplete="off"></textarea>
+                            </div>
+                            </div>
+                            <br><br><br>
+                            <div class="col-lg-12">
+                                <div class="col-lg-2">
+                                <label for="info-c">
+                                    اطلاعات C
+                                </label>
+                            </div>
+                            <div class="col-lg-10">
+                                <textarea name="info-c" id="info-c" class="form-control" autocomplete="off"></textarea>
+                            </div>
+                            </div>
+                            <button type="button" id="submit-info" name="submit-info" class="btn btn-primary col-lg-4 col-lg-push-5">
+                                <div class="fa fa-plus">
+
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-modal-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar" id="chatAvatar" style="width: 30px; height: 30px; font-size: 12px;">A</div>
+                <span id="chatName">Arshia(admin)</span>
+            </div>
+            <button style="background: none; border: none; color: #e0e0e0; cursor: pointer;" id="close_chat">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!--<div class="message received">Hey! Saw your latest post, it's amazing!</div>-->
+            <!--<div class="message sent">Thank you! I'm glad you liked it 🌙</div>-->
+            <% for(let i = 0;i < messages.length;i++) { %>
+                <div class="message sent">
+                    <%= messages[i].report %>
+                </div>
+            <% } %>
+            <% if((messages.length > 0) ? messages[0].answer != "" : false) { %>
+                <div class="message received" style="background: grey;">
+                    <%= messages[0].answer %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="/js/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>ثبت نام در مسابقه آرکادیا</title>
+</head>
+<body class="container-fluid" dir="rtl">
+    <div class="panel panel-primary container-fluid" style="padding: 8px;">
+        <div class="panel-heading" style="text-align: center;">
+            ثبت نام در مسابقه آرکادیا
+        </div>
+        <div class="panel-body">
+            <form action="" method="post" enctype="multipart/form-data" id="registerForm">
+            <div class="row">
+                <div class="col-lg-1 col-xs-4">
+                <label for="team_name">نام تیم:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="team_name" id="team_name">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="player_names">نام عضو اول:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="first_mate" id="player_names">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="first_phone">شماره تلفن: </label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="first_phone">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="player_names">نام عضو دوم:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="second_mate" id="player_names">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="second_phone">شماره تلفن: </label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="second_phone">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="player_names">نام عضو سوم:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="third_mate" id="player_names">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="third_phone">شماره تلفن: </label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="third_phone">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="school">نام مدرسه:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="school">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="class">کلاس و پایه: </label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="clas">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="color">رنگ تیم:</label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="text" class="form-control" required autocomplete="off" name="color" id="color">
+            </div>
+            <br><br><br>
+            <div class="col-lg-1 col-xs-4">
+                <label for="picture">عکس: </label>
+            </div>
+            <div class="col-lg-11 col-xs-8">
+                <input type="file" class="form-control" required autocomplete="off" name="picture" id="picture">
+            </div>
+            </div>
+            <br><br><br>
+            <button type="button" class="btn btn-primary col-lg-2 col-lg-push-5 col-xs-4 col-xs-push-5" id="make_account">
+                ثبت نام
+            </button>
+        </form>
+        </div>
+    </div>
+    <script src="/js/client.js"></script>
+</body>
+</html>

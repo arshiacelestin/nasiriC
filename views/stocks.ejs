@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت قیمت‌ها</title>
+    <style>
+        * {
+            font-family: 'Vazirmatn', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .table-container {
+            padding: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        th {
+            background: #4a5568;
+            color: white;
+            padding: 18px 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        td {
+            padding: 18px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 15px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        tr:hover {
+            background-color: #edf2f7;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 17px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .price {
+            font-weight: 700;
+            font-size: 18px;
+            color: #38a169;
+        }
+        
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .settings {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .settings h3 {
+            margin-top: 0;
+            color: #4a5568;
+            font-size: 18px;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .setting-item label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .setting-item input {
+            margin-bottom: 0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #38a169;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+
+    <meta id="user" content="<%= user._id %>">
+
+</head>
+<body dir="rtl" class="container-fluid">
+    <div class="container">
+        <div class="header">
+            <h1> ILOOR چارت قیمتی کالاها</h1>
+            <p>قیمت‌ها بر اساس عرضه و تقاضا به صورت خودکار محاسبه می‌شوند</p>
+        </div>
+        
+        <div class="table-container">
+            <table id="priceTable">
+                <thead>
+                    <tr>
+                        <th>کالا</th>
+                        <th>قیمت پایه</th>
+                        <th>تعداد</th>
+                        <th>قیمت محاسبه شده</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let i = 0;i < stocks.length;i++) { %>
+                        <tr data-item="<%= stocks[i].name %>">
+                        <td class="item-name"><%= stocks[i].name %></td>
+                        <td><label for="" id="base-price<%= i %>"><%= Number(stocks[i].price).toLocaleString() %></label></td>
+                        <td><input type="text" class="current-supply required_q" value="0" i="<%= i %>"><input type="hidden" id="tq<%= i %>"></td>
+                        <td class="price"><span id="price<%= i %>" pid="<%= stocks[i]._id %>">0</span></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+                <tbody>
+                    <tr data-item="">
+                    <td class="item-name">محموع کالاها</td>
+                    <td><label for="" id="base-pricet">238,000</label></td>
+                    <td><label for="" id="dqt">0</label><input type="hidden" id="tqt"></td>
+                    <td class="price"><span id="pricet" pid="t">0</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="controls">
+                <button class="btn btn-success" id="buy">خرید</button>
+                
+                <button class="btn btn-danger" id="sell">فروش</button>
+            </div>
+        
+        </div>
+    </div>
+    
+    
+    <script src="/js/client.js"></script>
+</body>
+</html>

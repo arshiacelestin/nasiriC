@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>جدول رتبه بندی</title>
+</head>
+<body class="container-fluid" dir="rtl">
+    <div class="panel panel-primary">
+        <div class="panel-heading" style="text-align: center;">
+            جدل رتبه بندی تیم ها
+        </div>
+        <div class="panel-body">
+            <table border="3px" class="col-lg-12">
+                <tr style="background-color: darkgray;"><th>رتبه</th><th>نام تیم</th><th>ارزش تیم</th></tr>
+                <% for(let i = 0;i <= end;i++) { %>
+                    <tr><td><%= rank %></td><td r=<% rank++ %>><%= team_values[i]['team'].name %></td><td><%= team_values[i]['value'].toLocaleString() %></td></tr>
+                <% } %>
+            </table>
+        </div>
+    </div>
+    <script src="/js/client.js"></script>
+</body>
+</html>

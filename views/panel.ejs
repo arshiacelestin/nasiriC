@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta id="ti" content="<%= team_id %>">
+
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>پنل کاربری</title>
+</head>
+<body dir="rtl" class="container-fluid">
+    <div class="col-lg-12">
+        <a href="/communication" style="color: black;">
+            <div class="col-lg-12">
+            <div style="border-radius: 50%;border: 1px solid black;text-align: center;width: 20px;height: 20px;margin-top: 20px;background-color: rgb(211, 66, 66);color: whitesmoke;" id="non">
+                <%= non %>
+            </div>
+            <div class="col-lg-2" style="position: relative;top: 0%;right: 0%;">
+            <div class="fa fa-bell fa-3x">
+
+            </div>
+        </div>
+        </a>
+        </div>
+        <div class="col-lg-2 col-lg-push-5">
+            <img src="" alt="" width="250px" height="250px" style="object-fit: cover;border: 1px solid grey;border-radius: 50%;" class="panel-logo">
+        </div>
+        <div class="col-lg-12">
+            <div class="col-lg-2 col-lg-push-4">
+                <span class="col-lg-10 col-lg-push-3" style="border: 1px solid black;border-radius: 8px;padding: 8px;text-align: center;"> 
+                    نام کاربری: <%= username %>
+                </span>
+            </div>
+            <div class="col-lg-2 col-lg-push-3">
+                <span class="col-lg-10 col-lg-push-10" style="border: 1px solid black;border-radius: 8px;padding: 8px;text-align: center;background: <%= team_color %>;color:white"> 
+                    نام تیم: <%= team_name %>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12" style="border-bottom: 1px solid grey;margin-top: 20px;">
+        <div class="col-lg-6" style="float: right;">
+            <a href="/stocks" style="color: black;">
+                <button type="button" class="btn btn-primary col-lg-7">
+                سهام ها 
+                </button>
+            </a>
+            <a href="/make-stock" style="color: black;">
+                <button type="button" class="btn btn-primary col-lg-5">
+                    ایجاد سهام برای شرکت
+                </button>
+            </a>
+        </div>
+        <div class="col-lg-6" style="float: left;">
+            <a href="/rankings" class="black">
+                <button type="button" class="btn btn-success col-lg-6 col-lg-push-1">
+                    جدول رتبه بندی
+                </button>
+            </a>
+            <a href="/communication" style="color: black;">
+                <button type="button" class="btn btn-success col-lg-4 col-lg-push-1">
+                    اعلانات
+                </button>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 400px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;"> 
+            <div class="col-lg-2">
+                <label for="stock_name">نام سهام: </label>
+            </div>
+            <div class="col-lg-10">
+                <select name="stock_name" id="display_stocks" class="form-control">
+                <% for(let i = 0;i < stocks.length;i++) { %>
+                    <option value="<%= stocks[i]._id %>"><%= stocks[i].name %></option>
+                <% } %>
+            </select>
+            </div>
+            <div class="col-lg-12"
+     style="border: 1px solid grey; border-radius: 8px; height: 300px; margin-top: 40px; position: relative; background: #f8f8f8;"
+     id="chart">
+
+    <% for (let i = 0; i < stocks[0].priceHistory.length; i++) { %>
+        <div style="
+            position: absolute;
+            bottom: 0;
+            left: <%= i * 20 + 5 %>px;
+            width: 10px;
+            background-color: <%= stocks[0].priceHistory[i] > stocks[0].priceHistory[i - 1] ? 'green' : 'red' %>;
+            height: <%= stocks[0].priceHistory[i] / 800 %>px;
+        " title="<%= Number(stocks[0].priceHistory[i]).toLocaleString() %>"></div>
+    <% } %>
+        <div style="
+            position: absolute;
+            bottom: 0;
+            left: <%= (stocks[0].priceHistory.length) * 20 + 5 %>px;
+            width: 10px;
+            background-color: <%= stocks[0].price > stocks[0].priceHistory[stocks[0].priceHistory.length-1] ? 'green' : 'red' %>;
+            height: <%= stocks[0].price / 800 %>px;
+        " label="<%= stocks[0].price %>" title="<%= Number(stocks[0].price).toLocaleString() %>"></div>
+    </div>
+        </div>
+        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 400px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;">
+            <div class="row">
+                <strong>ارزش شرکت: <%= net_worth %>T</strong>
+            </div>
+            <br><br>
+            <div class="row" style="color: <%= color %>;float: right;">
+                <strong>
+                    سود: %<%= (p*100) %><%= sign %>
+                </strong>
+            </div>
+            <br><br></br>
+            <div class="row">
+                <a href="/management-panel" style="color: black;">
+                    <button type="button" class="col-lg-6 btn btn-primary col-lg-push-3">
+                        <div class="fa fa-building fa-2x">
+
+                        </div>
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+<script src="js/client.js"></script>
+</body>
+</html>

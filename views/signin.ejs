@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <title>ورود به حساب</title>
+</head>
+<body dir="rtl" class="container-fluid">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="fa fa-sign-in">
+
+            </div>
+        </div>
+        <div class="panel-body">
+            <h3 style="border-bottom: 2px solid grey;padding: 8px;text-align: center;">ورود به حساب کاربری</h3>
+            <form action="" method="post" class="form-group">
+                <div class="col-lg-1"">
+                    <label for="username">نام کاربری: </label>
+                </div>
+                <div class="col-lg-11">
+                    <input type="text" class="form-control" required autocomplete="off" name="username" id="username">
+                </div>
+                <br><br>
+                <div class="col-lg-1">
+                    <label for="password">رمز: </label>
+                </div>
+                <div class="col-lg-11">
+                    <input type="password" class="form-control" required autocomplete="off" name="password" id="password">
+                </div>
+                <br><br>
+                <button type="submit" name="signin" class="btn btn-success col-lg-2 col-lg-push-5">
+                    <div class="fa fa-sign-in">
+
+                    </div>
+                </button>
+            </form>
+
+        </div>
+    </div>
+</body>
+</html>

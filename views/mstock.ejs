@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <meta id="user" content="<%= user._id %>">
+
+
+    <style>
+        .price {
+            font-weight: 700;
+            font-size: 18px;
+            color: #38a169;
+        }
+    </style>
+
+    <title>ایجاد سهام برای شرکت</title>
+</head>
+<body class="container-fluid" dir="rtl">
+    <div class="panel panel-primary">
+        <div class="panel-heading" style="text-align: center;">
+            تولید سهام
+        </div>
+        <div class="panel-body">
+            <form action="" method="post" class="form-group">
+            <div class="col-lg-1">
+                <label for="name">
+                    نام سهام: 
+                </label>
+            </div>
+            <div class="col-lg-11">
+                <input type="text" class="form-control" required autocomplete="off" name="name" id="name">
+            </div>
+            <div class="col-lg-12">
+                
+            </div>
+            <div class="col-lg-1">
+                <label for="quantity">
+                    تعداد سهام
+                </label>
+            </div>
+            <div class="col-lg-11">
+                <input type="text" class="form-control" required autocomplete="off" name="quantity" id="quantity">
+                <input type="hidden" id="tq" required autocomplete="off">
+            </div>
+            <div class="col-lg-12">
+
+            </div>
+            <label for="" class="col-lg-3">
+                قیمت محاسبه شده: 
+            </label>
+            <label for="price" id="price" style="text-align: right;" class="price col-lg-9">
+                0
+            </label>
+            <button type="button" id="make_personal_stock" class="btn btn-primary col-lg-2 col-lg-push-5">
+                ایجاد سهام
+            </button>
+        </form>
+        </div>
+    </div>
+    <script src="/js/client.js"></script>
+</body>
+</html>

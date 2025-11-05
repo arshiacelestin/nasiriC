@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowGram - Mysterious Social Network</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-icon {
+            color: #e0e0e0;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-icon:hover {
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Layout */
+        .main {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .feed-section {
+            flex: 2;
+        }
+
+        .sidebar {
+            flex: 1;
+            max-width: 350px;
+        }
+
+        /* Create Post */
+        .create-post {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .post-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            color: #e0e0e0;
+            resize: none;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .post-input::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-btn {
+            background: none;
+            border: none;
+            color: #4ecdc4;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .post-btn:hover {
+            color: #45b7d1;
+            transform: scale(1.1);
+        }
+
+        .share-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Posts */
+        .post {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        .post-content {
+            padding: 0 20px 15px;
+        }
+
+        .post-text {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .post-media {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            color: #4ecdc4;
+        }
+
+        .action-btn.liked {
+            color: #ff6b6b;
+        }
+
+        /* Chat Sidebar */
+        .chat-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-item.active {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-preview {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: rgba(224, 224, 224, 0.4);
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid #1a1a2e;
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            z-index: 1001;
+            flex-direction: column;
+        }
+
+        .chat-modal.active {
+            display: flex;
+        }
+
+        .chat-modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: #e0e0e0;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4ecdc4;
+        }
+
+        .profile-bio {
+            font-size: 14px;
+            color: rgba(224, 224, 224, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                max-width: none;
+            }
+            
+            .chat-modal {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">ILOOR</div>
+                <div class="nav-icons">
+                    <i class="fas fa-home nav-icon"></i>
+                    <i class="fas fa-search nav-icon"></i>
+                    <i class="fas fa-plus-square nav-icon" onclick="focusPostInput()"></i>
+                    <i class="fas fa-heart nav-icon"></i>
+                    <div style="position: relative;">
+                        <i class="fas fa-comment nav-icon" onclick="toggleChat()"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <i class="fas fa-user nav-icon"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main">
+            <!-- Feed Section -->
+            <div class="feed-section">
+                <!-- Create Post -->
+                <div class="create-post">
+                    <textarea class="post-input" placeholder="Share your thoughts in the shadows..." rows="3" id="postInput"></textarea>
+                    <div class="post-actions">
+                        <div class="post-buttons">
+                            <button class="post-btn" onclick="addMedia('photo')">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <button class="post-btn" onclick="addMedia('video')">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="post-btn">
+                                <i class="fas fa-poll"></i>
+                            </button>
+                            <button class="post-btn">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </button>
+                        </div>
+                        <button class="share-btn" onclick="createPost()">Share</button>
+                    </div>
+                </div>
+
+                <!-- Posts Feed -->
+                <div id="postsFeed">
+                    <!-- Sample Post -->
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="avatar">M</div>
+                            <div class="post-user-info">
+                                <div class="username">MysteryUser</div>
+                                <div class="post-time">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text">Lost in the digital shadows, finding light in the darkness... 🌑✨</div>
+                            <img src="https://picsum.photos/seed/shadow1/600/400.jpg" alt="Post image" class="post-media">
+                        </div>
+                        <div class="post-actions">
+                            <button class="action-btn" onclick="toggleLike(this)">
+                                <i class="fas fa-heart"></i>
+                                <span>42</span>
+                            </button>
+                            <button class="action-btn" onclick="toggleComments(this)">
+                                <i class="fas fa-comment"></i>
+                                <span>8</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-share"></i>
+                                <span>3</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Another Sample Post -->
+                    <div class="post">
+                        <div class="post-header">
+                            <div class="avatar" style="background: linear-gradient(45deg, #45b7d1, #96ceb4);">S</div>
+                            <div class="post-user-info">
+                                <div class="username">ShadowWalker</div>
+                                <div class="post-time">5 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text">The night is darkest just before the dawn. Keep pushing through the shadows. 🌃</div>
+                        </div>
+                        <div class="post-actions">
+                            <button class="action-btn" onclick="toggleLike(this)">
+                                <i class="fas fa-heart"></i>
+                                <span>128</span>
+                            </button>
+                            <button class="action-btn" onclick="toggleComments(this)">
+                                <i class="fas fa-comment"></i>
+                                <span>24</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-share"></i>
+                                <span>12</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar">Y</div>
+                    <div class="profile-name">YourShadow</div>
+                    <div class="profile-bio">Exploring the mysteries of digital existence</div>
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-number">342</div>
+                            <div class="stat-label">Posts</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">1.2K</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">892</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="chat-header">Messages</div>
+                    <div class="chat-list">
+                        <div class="chat-item active" onclick="openChat('MysteryUser')">
+                            <div style="position: relative;">
+                                <div class="avatar" style="width: 35px; height: 35px; font-size: 14px;">M</div>
+                                <div class="online-indicator"></div>
+                            </div>
+                            <div class="chat-info">
+                                <div class="chat-name">MysteryUser</div>
+                                <div class="chat-preview">Hey, saw your latest post...</div>
+                            </div>
+                            <div class="chat-time">2m</div>
+                        </div>
+                        <div class="chat-item" onclick="openChat('ShadowWalker')">
+                            <div class="avatar" style="width: 35px; height: 35px; font-size: 14px; background: linear-gradient(45deg, #45b7d1, #96ceb4);">S</div>
+                            <div class="chat-info">
+                                <div class="chat-name">ShadowWalker</div>
+                                <div class="chat-preview">Thanks for the follow! 🌙</div>
+                            </div>
+                            <div class="chat-time">1h</div>
+                        </div>
+                        <div class="chat-item" onclick="openChat('DarkSoul')">
+                            <div class="avatar" style="width: 35px; height: 35px; font-size: 14px; background: linear-gradient(45deg, #ff6b6b, #feca57);">D</div>
+                            <div class="chat-info">
+                                <div class="chat-name">DarkSoul</div>
+                                <div class="chat-preview">Let's collaborate on something...</div>
+                            </div>
+                            <div class="chat-time">3h</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-modal-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="avatar" id="chatAvatar" style="width: 30px; height: 30px; font-size: 12px;">M</div>
+                <span id="chatName">MysteryUser</span>
+            </div>
+            <button onclick="closeChat()" style="background: none; border: none; color: #e0e0e0; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message received">Hey! Saw your latest post, it's amazing!</div>
+            <div class="message sent">Thank you! I'm glad you liked it 🌙</div>
+            <div class="message received">The aesthetic is perfect for the shadow theme</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" placeholder="Type a message..." id="messageInput" onkeypress="handleMessageKeypress(event)">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentChat = 'MysteryUser';
+        const chatData = {
+            'MysteryUser': [
+                { type: 'received', text: 'Hey! Saw your latest post, it\'s amazing!' },
+                { type: 'sent', text: 'Thank you! I\'m glad you liked it 🌙' },
+                { type: 'received', text: 'The aesthetic is perfect for the shadow theme' }
+            ],
+            'ShadowWalker': [
+                { type: 'received', text: 'Thanks for the follow! 🌙' },
+                { type: 'sent', text: 'Your content is incredible!' }
+            ],
+            'DarkSoul': [
+                { type: 'received', text: 'Let\'s collaborate on something...' },
+                { type: 'sent', text: 'I\'d love to! What did you have in mind?' }
+            ]
+        };
+
+        function focusPostInput() {
+            document.getElementById('postInput').focus();
+        }
+
+        function addMedia(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = type === 'photo' ? 'image/*' : 'video/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const postInput = document.getElementById('postInput');
+                    postInput.value += `\n[${type.toUpperCase()}: ${file.name}]`;
+                }
+            };
+            input.click();
+        }
+
+        function createPost() {
+            const postInput = document.getElementById('postInput');
+            const content = postInput.value.trim();
+            
+            if (!content) {
+                showNotification('Please write something before posting!', 'warning');
+                return;
+            }
+
+            const postsFeed = document.getElementById('postsFeed');
+            const newPost = document.createElement('div');
+            newPost.className = 'post';
+            newPost.innerHTML = `
+                <div class="post-header">
+                    <div class="avatar">Y</div>
+                    <div class="post-user-info">
+                        <div class="username">YourShadow</div>
+                        <div class="post-time">Just now</div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <div class="post-text">${content}</div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(this)">
+                        <i class="fas fa-heart"></i>
+                        <span>0</span>
+                    </button>
+                    <button class="action-btn" onclick="toggleComments(this)">
+                        <i class="fas fa-comment"></i>
+                        <span>0</span>
+                    </button>
+                    <button class="action-btn">
+                        <i class="fas fa-share"></i>
+                        <span>0</span>
+                    </button>
+                    <button class="action-btn">
+                        <i class="fas fa-bookmark"></i>
+                    </button>
+                </div>
+            `;
+
+            postsFeed.insertBefore(newPost, postsFeed.firstChild);
+            postInput.value = '';
+            showNotification('Post created successfully!', 'success');
+        }
+
+        function toggleLike(button) {
+            button.classList.toggle('liked');
+            const icon = button.querySelector('i');
+            const count = button.querySelector('span');
+            const currentCount = parseInt(count.textContent);
+            
+            if (button.classList.contains('liked')) {
+                count.textContent = currentCount + 1;
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else {
+                count.textContent = currentCount - 1;
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        }
+
+        function toggleComments(button) {
+            showNotification('Comments feature coming soon!', 'info');
+        }
+
+        function toggleChat() {
+            const chatModal = document.getElementById('chatModal');
+            chatModal.classList.toggle('active');
+        }
+
+        function openChat(username) {
+            currentChat = username;
+            const chatModal = document.getElementById('chatModal');
+            const chatName = document.getElementById('chatName');
+            const chatAvatar = document.getElementById('chatAvatar');
+            
+            chatName.textContent = username;
+            chatAvatar.textContent = username.charAt(0);
+            
+            // Update chat messages
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            const messages = chatData[username] || [];
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.type}`;
+                messageDiv.textContent = msg.text;
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            chatModal.classList.add('active');
+            
+            // Update active chat item
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        function closeChat() {
+            document.getElementById('chatModal').classList.remove('active');
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message sent';
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            
+            // Add to chat data
+            if (!chatData[currentChat]) {
+                chatData[currentChat] = [];
+            }
+            chatData[currentChat].push({ type: 'sent', text: message });
+            
+            messageInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Simulate reply after 2 seconds
+            setTimeout(() => {
+                const replies = [
+                    "That's interesting! Tell me more...",
+                    "I completely agree with you!",
+                    "Thanks for sharing that! 🌙",
+                    "Great point! I hadn't thought of it that way.",
+                    "Sounds like a plan! Let's do it."
+                ];
+                
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'message received';
+                replyDiv.textContent = replies[Math.floor(Math.random() * replies.length)];
+                chatMessages.appendChild(replyDiv);
+                
+                chatData[currentChat].push({ type: 'received', text: replyDiv.textContent });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 2000);
+        }
+
+        function handleMessageKeypress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(45deg, #4ecdc4, #45b7d1)' : 
+                           type === 'warning' ? 'linear-gradient(45deg, #ff6b6b, #feca57)' : 
+                           'linear-gradient(45deg, #45b7d1, #96ceb4)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1002;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('Welcome to ShadowGram! 🌑', 'success');
+        });
+    </script>
+</body>
+</html>

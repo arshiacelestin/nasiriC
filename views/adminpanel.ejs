@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
+    <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <meta id="user" content="<%= user._id %>">
+    <title>پنل کاربری</title>
+</head>
+<body dir="rtl" class="container-fluid" style="background-color: rgb(223, 216, 216);">
+    <div class="col-lg-12">
+        <div class="col-lg-12" style="text-align: center;border-bottom: 1px solid grey;">
+            <h1>
+                شما: <%= user.username %>
+            </h1>
+        </div>
+        <div class="col-lg-4">
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                ایجاد تیم ها
+            </h2>
+            <form action="" method="post" class="col-lg-12 form-group">
+                <div class="col-lg-2">
+                    <label for="name">نام تیم: </label>
+                </div>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" name="name" id="name">
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="color">رنگ تیم: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" required autocomplete="off" name="color" id="color">
+                    </div>
+                </div>
+                <br><br>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" name="maketeam" id="maketeam">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+            </form>
+            <br><br><br><br><br><br><br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                افزودن کابران
+            </h2>
+            <form action="" method="post">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                    <label for="username">نام کاربری: </label>
+                </div>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" id="username">
+                </div>
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-12">
+                    <div class="col-lg-2">
+                    <label for="password">رمز: </label>
+                </div>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" id="password">
+                </div>
+                </div>
+                </div>
+                <br><br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                    <label for="forteam">تیم: </label>
+                </div>
+                <div class="col-lg-10">
+                    <select name="team_select" id="team_select" class="form-control">
+                    <% for(let i = 0;i < teams.length;i++){ %>
+                        <option value="<%= teams[i]._id %>"><%= teams[i].name %></option>
+                    <% } %>
+                </select>
+                </div>
+                </div>
+                <br><br>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" id="add_user">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+            </form>
+            <br><br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                حذف تیم
+            </h2>
+            <form action="" method="post" class="form-group">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="rtn">نام گروه: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <select name="rts" id="rts" class="form-control">
+                            <% for(let i = 0;i < teams.length;i++) { %>
+                                <option value="<%= teams[i]._id %>"><%= teams[i].name %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-lg-12">
+
+                    </div>
+                    <button type="button" id="remove_team" class="btn btn-primary col-lg-2 col-lg-push-6">
+                        <div class="fa fa-minus">
+
+                        </div>
+                    </button>
+                </div>
+            </form>
+            <br><br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                بروزرسانی تیم
+            </h2>
+            <form action="" method="post" class="form-group">
+                <label for="team" class="col-lg-2">
+                    تیم: 
+                </label>
+                <div class="col-lg-10">
+                    <select name="team" id="team_for_update_here" class="form-control">
+                        <% for(let i = 0; i < teams.length;i++) { %>
+                            <option value="<%= teams[i]._id %>"><%= teams[i].name %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <br><br>
+                <label for="color" class="col-lg-2">
+                    رنگ تیم: 
+                </label>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" name="update_color_here" id="update_color_here" value="<%= teams[0].color %>">
+                </div>
+                <br><br><br>
+                <label for="net_worth" class="col-lg-2">
+                    ارزش تیم:
+                </label>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" name="net_worth_update_here" id="net_worth_update_here" value="<%= teams[0].net_worth.toLocaleString() %>">
+                </div>
+                <br><br>
+                <button type="button" name="update_team" id="update_team" class="btn btn-primary col-lg-2 col-lg-push-4">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+            </form>
+        </div>
+        <div class="col-lg-4" style="border-right: 1px solid black;border-left: 1px solid black;height: 700px;">
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                افزودن استاک
+            </h2>
+            <form action="" method="post">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="name">نام: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" required autocomplete="off" name="stock_name" id="stock_name">
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="price">قیمت(هر یک واحد): </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="hidden" id="tprice">
+                        <input type="text" class="form-control" required autocomplete="off" name="price" id="price">
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="quantity">تعداد: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="hidden" id="tnumber">
+                        <input type="text" class="form-control" required autocomplete="off" name="number" id="number">
+                    </div>
+                </div>
+                <br><br>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" id="make_stock">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+            </form>
+            <br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                بروزرسانی استاک
+            </h2>
+            <form action="" method="post">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="ustockn">استاک: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <select name="ustockn" id="ustockn" class="form-control">
+                            <% for(let i = 0;i < stocks.length;i++) { %>
+                                <option value="<%= stocks[i]._id %>"><%= stocks[i].name %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="name">نام: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" required autocomplete="off" value="<%= stocks[0].name %>" name="ustock_name" id="ustock_name">
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="price">قیمت(هر یک واحد): </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="hidden" id="utprice" value="<%= stocks[0].price %>">
+                        <input type="text" class="form-control" required autocomplete="off" value="<%= Number(stocks[0].price).toLocaleString() %>" name="uprice" id="uprice">
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="quantity">تعداد: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="hidden" id="utnumber" value="<%= stocks[0].quantity %>">
+                        <input type="text" class="form-control" required autocomplete="off" value="<%= Number(stocks[0].quantity).toLocaleString() %>" name="unumber" id="unumber">
+                    </div>
+                </div>
+                <br><br>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" id="update_stock">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+            </form>
+            <br><br><br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                حذف استاک
+            </h2>
+            <form action="" method="post" class="form-group">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="rs">نام استاک</label>
+                    </div>
+                    <div class="col-lg-10">
+                        <select name="rss" id="rss"  class="form-control">
+                            
+                            <% for(let i = 0;i < stocks.length;i++) { %>
+                                <option value="<%= stocks[i]._id %>"><%= stocks[i].name %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" id="remove_stock">
+                    <div class="fa fa-minus">
+
+                    </div>
+                </button>
+            </form>
+        </div>
+        <div class="col-lg-4">
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                بارگذاری خبر
+            </h2>
+            <form action="" method="post" class="form-group">
+                <div class="col-lg-12">
+                    <div class="col-lg-2">
+                        <label for="publisher">نام آپلودر: </label>
+                    </div>
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" required autocomplete="off" name="publisher" id="publisher">
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <label for="topic">موضوع: </label>
+                </div>
+                <div class="col-lg-10">
+                    <input type="text" class="form-control" required autocomplete="off" name="topic" id="topic">
+                </div>
+                <div class="col-lg-2">
+                    <label for="text">متن خبر: </label>
+                </div>
+                <div class="col-lg-10">
+                    <textarea name="text" id="text" class="form-control" required autocomplete="off"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-6" name="add_news" id="add_news">
+                    <div class="fa fa-plus">
+
+                    </div>
+                </button>
+                <br><br><br><br><br><br><br><br>
+                <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                    خبرها
+                </h2>
+                <table border="3px" style="width: 100%;background-color: whitesmoke;">
+                    <tr><th style="width: 90px;">آپلودر</th><th style="width: 50px;">موضوع</th><th style="width: 50px;">متن</th><th style="width: 50px;">حذف</th></tr>
+                    <% for(let i = 0;i < notifs.length;i++) { %>
+                        <tr>
+                            <td style="text-align: center;"><%= notifs[i].publisher_name %></td>
+                            <td style="text-align: center;"><%= notifs[i].topic %></td>
+                            <td style="text-align: center;"><%= notifs[i].text %></td>
+                            <td style="text-align: center;"><button type="button" class="btn btn-danger remove_n"nid="<%= notifs[i]._id %>"><div class="fa fa-minus"></div></button></td>
+                        </tr>
+                    <% } %>
+                </table>
+            </form>
+            
+            <h2 style="text-align: center;border-bottom: 1px solid grey;margin-top: 48px;">
+                پیام ها
+            </h2>
+            <table border="3px" style="background-color: whitesmoke;width: 100%;" id="reports_here">
+                <tr><th>نام کاربر</th><th>پیام</th><th>صحبت</th></tr>
+                <% for(let i = 0;i < reports.length;i++) { %>
+                    <tr><td><%= reports_users[i].username %></td><td><%= reports[i].report %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
+                <% } %>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-12" style="position: absolute;top: 50%;right: 20%;display: none;background-color: grey;" id="conv">
+
+    </div>  
+            <h2 style="text-align: center;border-bottom: 1px solid grey;margin-top: 48px;">
+                اطلاعات
+            </h2>
+            <table border="3px" style="background-color: whitesmoke;width: 100%;" id="reports_here">
+                <tr><th>کاربر</th><th>A</th><th>B</th><th>C</th></tr>
+                <% for(let i = 0;i < infos.length;i++) {%>
+                    <tr><td><%= the_dudes[i].username %></td><td><%= infos[i].text[0] %></td><td><%= infos[i].text[1] %></td><td><%= infos[i].text[2] %></td></tr>
+                <% } %>
+            </table>
+        </div>
+    </div>
+    <br><br><br><br>
+    <div class="col-lg-12">
+        <h2 style="text-align: center;border-bottom: 1px solid grey;margin-top: 48px;">
+            درخواست ها
+        </h2>
+        <table border="3px" style="background-color: whitesmoke;width: 100%;">
+            <tr><th>از</th><th>به</th><th>وضعیت</th><th>تایید</th><th>حذف</th></tr>
+            <% for(let i = 0;i < offers["offerer"].length;i++) { %>
+                <tr><td><%= offers["offerer"][i] %></td><td><%= offers["reciver"][i] %></td><td><%= offers["state"][i] %></td><td><div class="btn btn-success conf" id="<%= offers['id'][i] %>">
+                    تایید
+                </div></td><td>
+                    <div class="btn btn-danger dec" id="<%= offers['id'][i] %>">
+                        رد
+                    </div>
+                </td></tr>
+            <% } %>
+        </table>
+    </div>
+    <br><br><br>
+    <div class="col-lg-12">
+        <h2 style="text-align: center;border-bottom: 1px solid grey;margin-top: 48px;">
+            ثبت نام ها
+        </h2>
+        <table border="3px"> 
+            <tr><th>نام تیم</th><th>عضو اول</th><th>شماره اول</th><th>عضو دوم</th><th>شماره دوم</th><th>عضو سوم</th><th>شماره سوم</th><th>نام مدرسه</th><th>کلاس و پایه</th><th>رنگ تیم</th><th>فیش واریزی</th></tr>
+            <% for(let i = 0;i < wanna.length;i++) { %>
+                <tr><td><%= wanna[i].team_name %></td><td><%= wanna[i].first_mate %></td><td><%= wanna[i].first_phone %></td><td><%= wanna[i].second_mate %></td><td><%= wanna[i].second_phone %></td><td><%= wanna[i].third_mate %></td><td><%= wanna[i].third_phone %></td><td><%= wanna[i].school %></td><td><%= wanna[i].clas %></td><td><%= wanna[i].color %></td><td><img src="/images/<%= wanna[i].pic %>" alt=""></td></tr>
+            <% } %>
+        </table>
+    </div>
+<script src="/js/client.js"></script>
+</body>
+</html>
