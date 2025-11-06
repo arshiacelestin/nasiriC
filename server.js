@@ -31,10 +31,9 @@ mongoose.connect("mongodb+srv://gjouh25_db_user:Ax2Y61EolfYG4D6S@nasiric.n4sw0cd
 }).then(()=> console.log("connected to DB")).catch((err)=>console.error("fuck"));
 
 
-
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
-        const dir = path.join("public", "images");
+        const dir = path.join(__dirname, "public", "images");
         cb(null, dir);
     },
     filename: function(req, file, cb){
