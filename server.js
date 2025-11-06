@@ -356,9 +356,10 @@ app.get("/communication", async (req, res)=>{
     if(req.session.user){
         const notifs = await Notification.find().lean();
         const messages = await Reprots.find({
-            user_id: req.session.user._id
+            user_id: req.session.user._id,
         }).lean();
-        res.render("notifs-panel.ejs", {"user": req.session.user, "notifs": notifs, "messages": messages});
+
+        res.render("notifs-panel.ejs", {"user": req.session.user, "notifs": notifs, "messages": messages, "nagh": ""});
     }else{
         res.redirect("/login");
     }
@@ -417,10 +418,10 @@ app.get("/signup", (req, res)=>{
 })
 app.post("/make_account", upload.single("picture"), async (req, res)=>{
     console.log("m");
-    const { team_name, first_mate, first_phone, second_mate, second_phone, third_mate, third_phone, school, clas, color } = req.body;
+    const { team_name, first_mate, first_phone, second_mate, second_phone, third_mate, third_phone, school, clas} = req.body;
 
 
-    console.log(`team: ${team_name}, firstmate: ${first_mate}->${first_phone}, secondmate: ${second_mate}->${second_phone}, thirdmate: ${third_mate}->${third_phone}, school: ${school}, class: ${clas}, color: ${color}`);
+    console.log(`team: ${team_name}, firstmate: ${first_mate}->${first_phone}, secondmate: ${second_mate}->${second_phone}, thirdmate: ${third_mate}->${third_phone}, school: ${school}, class: ${clas}, color: nigger`);
 
 
     const signer = new signers({
@@ -433,7 +434,7 @@ app.post("/make_account", upload.single("picture"), async (req, res)=>{
         third_phone: third_phone,
         school: school,
         clas: clas,
-        color: color,
+        color: "nigger",
         pic: req.file.filename
     });
     await signer.save();
@@ -903,14 +904,19 @@ io.on("connection", (socket)=>{
         }
     });
     socket.on("admin sent answer", async ([answer, user_id])=>{
-        const u = await Reprots.updateMany({
-            user_id: user_id
-        }, {
-            answer: answer
+        
+        let pussy = new Reprots({
+            user_id: user_id,
+            report: "boobool talai",
+            answer: answer,
+            admin_id: "68dd94f25cda0c30e6853199"
         });
+        await pussy.save();
+
         const reports = await Reprots.find({
             user_id: user_id
-        }).lean();
+        });
+
         io.emit("answers saved", (reports));
     });
 

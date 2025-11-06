@@ -392,8 +392,8 @@
         }
 
         .message.received {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
+            background: forestgreen !important;
+            color: #0c0c0c !important;
             align-self: flex-start;
         }
 
@@ -621,7 +621,18 @@
                                 </div>
                                 <div class="chat-info">
                                     <div class="chat-name"><%= user.username %></div>
-                                    <div class="chat-preview"><%= ((messages.length > 0) ? messages[messages.length-1].report : 'پیامی موجود نیست')%></div>
+                                    <div class="chat-preview">
+                                        <% for(let i = 0;i < messages.length;i++) { %>
+                                            <% if(messages[i].report != "boobool talai"){ %>
+                                                <% nagh = messages[i].report %>
+                                            <% }else if(messages[i].answer != "") { %>
+                                                <% nagh = messages[i].answer %> 
+                                            <% }else{ %>
+                                                <% nagh = "پیامی موجود نیست" %>
+                                            <% } %>
+                                        <% } %>
+                                        <%= nagh %>
+                                    </div>
                                 </div>
                             </div>
                     </div>
@@ -692,14 +703,15 @@
             <!--<div class="message received">Hey! Saw your latest post, it's amazing!</div>-->
             <!--<div class="message sent">Thank you! I'm glad you liked it 🌙</div>-->
             <% for(let i = 0;i < messages.length;i++) { %>
-                <div class="message sent">
-                    <%= messages[i].report %>
-                </div>
-            <% } %>
-            <% if((messages.length > 0) ? messages[0].answer != "" : false) { %>
-                <div class="message received" style="background: grey;">
-                    <%= messages[0].answer %>
-                </div>
+                <% if(messages[i].report != "boobool talai" ) { %>
+                    <div class="message sent">
+                        <%= messages[i].report %>
+                    </div>
+                <% } else { %>
+                    <div class="message received" style="background-color: olive;">
+                        <%= messages[i].answer %>
+                    </div>
+                <% } %>
             <% } %>
         </div>
     </div>
