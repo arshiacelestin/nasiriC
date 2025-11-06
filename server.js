@@ -30,12 +30,12 @@ mongoose.connect("mongodb+srv://gjouh25_db_user:Ax2Y61EolfYG4D6S@nasiric.n4sw0cd
     useUnifiedTopology: true
 }).then(()=> console.log("connected to DB")).catch((err)=>console.error("fuck"));
 
-app.use("/images", express.static("/data"));
+
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
-        // const dir = path.join(__dirname, "public", "images");
-        cb(null, "/data");
+        const dir = path.join("public", "images");
+        cb(null, dir);
     },
     filename: function(req, file, cb){
         cb(null, Date.now() + path.extname(file.originalname))
