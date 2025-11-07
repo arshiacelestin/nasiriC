@@ -435,12 +435,12 @@ app.post("/make_account", upload.single("picture"), async (req, res)=>{
         school: school,
         clas: clas,
         color: "nigger",
-        pic: req.file.filename
+        pic: (req.file.filename) ?? "none found"
     });
     await signer.save();
 
     if(!req.file){
-        res.status(404).send("no file detected");
+        console.log("no file detected");
     }
 
 });
