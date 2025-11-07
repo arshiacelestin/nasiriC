@@ -287,7 +287,7 @@ $(document).ready(()=>{
     });
     
     socket.on("notifs changed", (notifs)=>{
-        if(window.location == "http://127.0.0.1:8080/communication"){
+        if(window.location == "https://nasiric.onrender.com/communication"){
             let html = "";
             for(let i = 0;i < notifs.length;i++){
                 html += `<div class="post">
@@ -310,7 +310,7 @@ $(document).ready(()=>{
             let audio = new Audio("notif.mp3");
             audio.play();
             $("#postsFeed").html(html);
-        }else if(window.location == "http://127.0.0.1:8080/"){
+        }else if(window.location == "https://nasiric.onrender.com/"){
             let number = 0;
             for(let i = 0;i < notifs.length;i++){
                 number++;
@@ -326,6 +326,7 @@ $(document).ready(()=>{
             socket.emit("new report", ([$("#postInput").val(), $("#user").attr("content")]));
             socket.on("report sent", (txt)=>{
                 alert(txt);
+                window.location.reload();
             })
         }
     });
@@ -347,7 +348,7 @@ $(document).ready(()=>{
         let user_id = $(this).attr("uid");
         socket.emit("admin sent answer", ([answer, user_id]));
         socket.on("answers saved", (reports)=>{
-            if(window.location == "http://127.0.0.1:8080/communication"){
+            if(window.location == "https://nasiric.onrender.com/communication"){
                 let html = "";
                 for(let i = 0;i < reports.length;i++){
                     html += `<div class='message sent'>${reports[i].report}</div>`;
@@ -360,7 +361,7 @@ $(document).ready(()=>{
         });
     });
     socket.on("report sent admin", ([reports, users])=>{
-        if(window.location == "http://127.0.0.1:8080/admin/panel"){
+        if(window.location == "https://nasiric.onrender.com/admin/panel"){
             let html = "";
             for(let i = 0;i < reports.length;i++){
                 html += `<tr><td>${users[i].username}</td><td>${reports[i].report}</td><td><div class="btn btn-success speak" rid="${reports[i]._id}"><div class="fa fa-plus"></div></div></td></tr>`;
@@ -371,7 +372,7 @@ $(document).ready(()=>{
             
             $("#reports_here").html(html);
         }
-        if(window.location == "http://127.0.0.1:8080/communication"){
+        if(window.location == "https://nasiric.onrender.com/communication"){
             for(let i = 0;i < users.length;i++){
                 let last_text = "";
                 if(users[i]._id == $("#user").attr("content")){
@@ -603,10 +604,7 @@ $(document).ready(()=>{
             }
         });
         alert("اطلاعات شما با موفقیت فرستاده شد و پس از بررسی توسط ادمین ها تیم شما ایجاد میشود.");
+        window.location.reload();
     });
 });
 
-//if(window.location == "http://127.0.0.1:8080/admin/panel"){
-
-//    
-//}
