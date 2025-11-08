@@ -413,8 +413,12 @@ app.get("/rankings", async (req, res)=>{
     }
 });
 
-app.get("/signup", (req, res)=>{
-    res.render("signup.ejs");
+app.get("/signup", async (req, res)=>{
+
+    const number = (await signers.find()).length;
+    const allowed = (number <= 16);
+
+    res.render("signup.ejs", {"allowed": allowed});
 })
 app.post("/make_account", upload.single("picture"), async (req, res)=>{
     

@@ -103,9 +103,19 @@
             </div>
             </div>
             <br><br><br>
-            <button type="button" class="btn btn-primary col-lg-2 col-lg-push-5 col-xs-4 col-xs-push-5" id="make_account">
-                ثبت نام
-            </button>
+            <% if(allowed) { %>
+                <button type="button" class="btn btn-primary col-lg-2 col-lg-push-5 col-xs-4 col-xs-push-5" id="make_account">
+                    ثبت نام
+                </button>
+            <% }else{ %>
+                <label for="">
+                    با عرض پوزش
+                    .ظرفیت مسابقه آرکادیا به اتمام رسیده است
+                </label>
+                <script>
+                    alert("کاربر گرامی با عرض پوزش ظرفیت مسابقه آرکادیا به اتمام رسیده است.");
+                </script>
+            <% } %>
         </form>
         </div>
     </div>
