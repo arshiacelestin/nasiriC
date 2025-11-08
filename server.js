@@ -417,11 +417,18 @@ app.get("/signup", (req, res)=>{
     res.render("signup.ejs");
 })
 app.post("/make_account", upload.single("picture"), async (req, res)=>{
-    console.log("m");
+    
+    const number = (await signers.find()).length;
+    if(number > 16){
+        io.emit("no more space");
+        return;
+    }
+
     const { team_name, first_mate, first_phone, second_mate, second_phone, third_mate, third_phone, school, clas} = req.body;
 
 
     console.log(`team: ${team_name}, firstmate: ${first_mate}->${first_phone}, secondmate: ${second_mate}->${second_phone}, thirdmate: ${third_mate}->${third_phone}, school: ${school}, class: ${clas}, color: nigger`);
+
 
 
     const signer = new signers({

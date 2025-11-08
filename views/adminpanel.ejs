@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
     <link rel="stylesheet" href="/css/styles.css">
 
+    <link rel="shortcut icon" href="/nasiri-logo.ico">
+
     <meta id="user" content="<%= user._id %>">
     <title>پنل کاربری</title>
 </head>
@@ -370,9 +372,9 @@
             ثبت نام ها
         </h2>
         <table border="3px"> 
-            <tr><th>نام تیم</th><th>عضو اول</th><th>شماره اول</th><th>عضو دوم</th><th>شماره دوم</th><th>عضو سوم</th><th>شماره سوم</th><th>نام مدرسه</th><th>کلاس و پایه</th><th>رنگ تیم</th><th>فیش واریزی</th></tr>
+            <tr><th>نام تیم</th><th>عضو اول</th><th>شماره اول</th><th>عضو دوم</th><th>شماره دوم</th><th>عضو سوم</th><th>شماره سوم</th><th>نام مدرسه</th><th>کلاس و پایه</th><th>رنگ تیم</th><th>فیش واریزی</th><th>تاریخ بارگذاری</th></tr>
             <% for(let i = 0;i < wanna.length;i++) { %>
-                <tr><td><%= wanna[i].team_name %></td><td><%= wanna[i].first_mate %></td><td><%= wanna[i].first_phone %></td><td><%= wanna[i].second_mate %></td><td><%= wanna[i].second_phone %></td><td><%= wanna[i].third_mate %></td><td><%= wanna[i].third_phone %></td><td><%= wanna[i].school %></td><td><%= wanna[i].clas %></td><td><%= wanna[i].color %></td><td><img src="/images/<%= wanna[i].pic %>" alt=""></td></tr>
+                <tr><td><%= wanna[i].team_name %></td><td><%= wanna[i].first_mate %></td><td><%= wanna[i].first_phone %></td><td><%= wanna[i].second_mate %></td><td><%= wanna[i].second_phone %></td><td><%= wanna[i].third_mate %></td><td><%= wanna[i].third_phone %></td><td><%= wanna[i].school %></td><td><%= wanna[i].clas %></td><td><%= wanna[i].color %></td><td><img src="/images/<%= wanna[i].pic %>" alt=""></td><td><%= wanna[i].createdAt %></5></td></tr>
             <% } %>
         </table>
     </div>

@@ -11,7 +11,8 @@ const model = new mongoose.Schema({
     school: {type: String, required:true},
     clas: {type: String, required:true},
     color: {type: String, required:true},
-    pic: {type: String, required:true}
+    pic: {type: String, required:true},
+    createdAt: {type: Date, default: Date.now}
 });
 
 const signers = mongoose.model("signers", model);
