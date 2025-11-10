@@ -116,7 +116,7 @@
             <br><br>
             <div class="row" style="color: <%= color %>;float: right;">
                 <strong>
-                    سود: %<%= (p*100) %><%= sign %>
+                    سود: %<%= String(p*100).substring(0, 4) %><%= sign %>
                 </strong>
             </div>
             <br><br></br>

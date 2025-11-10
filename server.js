@@ -218,7 +218,10 @@ app.post("/login", async (req, res)=>{
 app.get("/stocks", async (req, res)=>{
     if(req.session.user){
         const stocks = await Stocks.find().lean();
-        res.render("stocks.ejs", {"stocks": stocks, "user": req.session.user});
+        const ut = await Team.findById(req.session.user.team_id).lean();
+
+
+        res.render("stocks.ejs", {"stocks": stocks, "user": req.session.user, "ut": ut});
     }else{
         res.redirect("/login");
     }
@@ -396,7 +399,7 @@ app.get("/rankings", async (req, res)=>{
             last_i = i-1;
         }
         let temp;
-        for(let i = 0; i <= last_i;i++){
+        for(let i = 0; i <= last_i+1;i++){
             for(let j = 0;j <= last_i;j++){
                 temp = team_values[i];
                 if(team_values[i]['value'] > team_values[j]['value']){
@@ -407,7 +410,7 @@ app.get("/rankings", async (req, res)=>{
         }
         
         
-        res.render("rankings.ejs", {"team_values": team_values, "rank": 1, "end": last_i});
+        res.render("rankings.ejs", {"team_values": team_values, "rank": 1, "end": last_i+1});
     }else{
         res.redirect("/login");
     }
@@ -545,10 +548,23 @@ io.on("connection", (socket)=>{
             const rep = await Reprots.deleteMany({
                 user_id: users[i]._id
             });
+            const inf = await Info.deleteMany({
+                user_id: new mongoose.Types.ObjectId(users[i]._id)
+            });
         }
 
         const ur = await User.deleteMany({
             team_id: team_id
+        });
+        const ofe = await offer.deleteMany({
+            $or: [
+                {
+                    reciver: new mongoose.Types.ObjectId(team_id)
+                },
+                {
+                    offerer: new mongoose.Types.ObjectId(team_id)
+                }
+            ]
         });
         const r = await Team.findByIdAndDelete(team_id);
         const p = await pn.deleteOne({
@@ -895,7 +911,7 @@ io.on("connection", (socket)=>{
             name: sname,
             price: price_for_each,
             quantity: 0,
-            priceHistory: [0]
+            priceHistory: [Number(price_for_each)]
             }); 
             await stock.save();
             const team_stock = new TeamStock({

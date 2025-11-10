@@ -410,6 +410,11 @@ $(document).ready(()=>{
             alert("پول کافی نداری بدبخت");
         })
     });
+
+    $(document).on("keyup", ".phone-number", function(){
+        
+    });
+
     $(document).on("click", "#chatWithAdmin", function(){
         $("#chatModal").css("display", "block");
     });
