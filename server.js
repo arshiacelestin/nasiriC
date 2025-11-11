@@ -357,7 +357,7 @@ app.get("/management-panel", async (req, res)=>{
 });
 app.get("/communication", async (req, res)=>{
     if(req.session.user){
-        const notifs = await Notification.find().lean();
+        const notifs = await Notification.find().lean().sort({createdAt: -1});
         const messages = await Reprots.find({
             user_id: req.session.user._id,
         }).lean();
@@ -436,8 +436,6 @@ app.post("/make_account", upload.single("picture"), async (req, res)=>{
 
     console.log(`team: ${team_name}, firstmate: ${first_mate}->${first_phone}, secondmate: ${second_mate}->${second_phone}, thirdmate: ${third_mate}->${third_phone}, school: ${school}, class: ${clas}, color: nigger`);
 
-
-
     const signer = new signers({
         team_name: team_name,
         first_mate: first_mate,
@@ -456,6 +454,8 @@ app.post("/make_account", upload.single("picture"), async (req, res)=>{
     if(!req.file){
         console.log("no file detected");
     }
+
+    return res.send("کاربر گرامی حساب شما با موفقیت ایجاد شده\nدر صورت نیاز با شما تماس گرفته خواهد شد");
 
 });
 
@@ -579,6 +579,17 @@ io.on("connection", (socket)=>{
         const r3 = await Transactions.deleteMany({
             stock_id: stock_id
         });
+        const r4 = await offer.deleteMany({
+            $or: [
+                {
+                    what_stock: stock_id
+                },
+                {
+                    pbs: stock_id
+                }
+            ]
+        });
+        socket.emit("sr");
     });
 
     /*

@@ -130,6 +130,11 @@ $(document).ready(()=>{
     });
     $(document).on("click", "#remove_stock", function(){
         socket.emit("remove stock", ($("#rss").val()));
+        socket.on("sr", ()=>{
+            if(window.location == "https://nasiric.onrender.com/admin/panel"){
+                alert("سهام حذف شد.");
+            }
+        });
         window.location.reload();
     });
     $(document).on("keyup", ".required_q", function(){
@@ -475,10 +480,11 @@ $(document).ready(()=>{
             pays_buy = "money";
             quantity = $("#payment_quantity").val();
         }
-        alert(`from: ${from} to: ${to}, they buy: ${buys}, quantity: ${how_many}, pm: ${payment_method}, this many: ${quantity}, pays_buy: ${pays_buy}`);
+        
         socket.emit("sends an offer to buy", ([from, to, buys, how_many, payment_method, quantity, pays_buy]));
         socket.on("offer to buy made", ()=>{
             alert("درخواست شما برای تیم مقابل ارسال شد.");
+            window.location.reload();
         })
     });
     $(document).on("change", "#team_for_update_here", function(){
@@ -537,15 +543,15 @@ $(document).ready(()=>{
     });
 
     $(document).on("click", "#sells", function(){
-        alert("f");
         let from = $("#ti").attr("content");
         let to = $("#to_team").val();
         let sells = $("#sells_what").val();
         let sells_many = $("#how_many_sells").val();
         let pbs = ($("#sells_by").val() == "money") ?  "money" : $("#gets_stock").val();
         let gets_many = $("#gets_how_many").val();
-        alert("s");
         socket.emit("wants to sell stock", ([from, to, sells, sells_many, pbs, gets_many]));
+        alert("درخواست شما ثبت گردید.");
+        window.location.reload();
     });
     $(document).on("click", "#gets_how_many", function(){
         let val = Number($(this).val().replace(/,/g, ""));
@@ -578,7 +584,6 @@ $(document).ready(()=>{
         socket.emit("offer declined", ($(this).attr("id")));
     });
     socket.on("offer declined announcment", ([offerer, reciver])=>{
-        
         if(String($("#ti").attr("content")) == String(offerer) || String($("#ti").attr("content")) == String(reciver)){
             alert("کاربر گرامی یکی از درخواست ها رد شده است.");
             let audio = new Audio("notif.mp3");
@@ -595,7 +600,12 @@ $(document).ready(()=>{
         var form = $("#registerForm")[0];
         var data = new FormData(form);
 
-
+        
+        if(!(String($("#first_phone").val()).length == 11 && String($("#second_phone").val()).length == 11 && String($("#third_phone").val()).length == 11)){
+            alert("لطفا تمامی شماره تلفن هارا به درستی وارد کنید.\nمطمعا شوید که هیچ فاصله ای میان ارقام و یا در انتها و ابتدا  موجود نیست");
+            return;
+        }
+        
         
 
         $.ajax({
@@ -605,10 +615,13 @@ $(document).ready(()=>{
             contentType: false,
             processData: false,
             success: function(data){
-                alert("اطلاعات شما با موفقیت فرستاده شد و پس از بررسی توسط ادمین ها تیم شما ایجاد میشود.");
+                alert(data);
+            },
+            error: function(){
+                alert("با عرض پوزش در ارسال این اطلاعات با مشکلی مواجه شدیم\nلطفا دوباره تلاش کنید.\nدر صورت ادامه مشکل به شماره 0930 355 6126 در واتساپ یا ایتا پیام دهید");
             }
         });
-        alert("اطلاعات شما با موفقیت فرستاده شد و پس از بررسی توسط ادمین ها تیم شما ایجاد میشود.");
+        
     });
     socket.on("no more space", ()=>{
         if(window.location == "https://nasiric.onrender.com/signup"){
