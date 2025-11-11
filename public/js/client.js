@@ -607,7 +607,7 @@ $(document).ready(()=>{
         }
         
         
-
+        alert("لطفا تا دریافت پیام اعلام نتیجه از سایت خارج نشوید.");
         $.ajax({
             type: "post",
             url: "/make_account",
