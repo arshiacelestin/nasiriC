@@ -104,6 +104,16 @@
             </div>
             <br><br><br>
             <% if(allowed) { %>
+                <% if(brf=="yes") { %>
+                    <script>
+                        alert("با عرض پوزش ظرفیت تیم های پسر پر شده است و تنها برای تیم های دختر ظرفیت باقی مانده.");
+                    </script>
+                <% } %>
+                <% if(grf=="yes") { %>
+                    <script>
+                        alert("با عرض پوزش ظرفیت تیم های دختر پر شده است و تنها برای تیم های پسر ظرفیت باقی مانده.");
+                    </script>
+                <% } %>
                 <button type="button" class="btn btn-primary col-lg-2 col-lg-push-5 col-xs-4 col-xs-push-5" id="make_account">
                     ثبت نام
                 </button>

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/css/bootstrap.min.rtl.css">
     <link rel="stylesheet" href="/font-awsome/css/font-awesome.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>پنل کاربری</title>
 </head>
 <body dir="rtl" class="container-fluid">
@@ -74,7 +75,7 @@
         </div>
     </div>
     <div class="col-lg-12">
-        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 400px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;"> 
+        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 750px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;"> 
             <div class="col-lg-2">
                 <label for="stock_name">نام سهام: </label>
             </div>
@@ -85,6 +86,13 @@
                 <% } %>
             </select>
             </div>
+            <br>
+            <div style="height: 300px;">
+                <canvas id="canv">
+
+            </canvas>
+            </div>
+            <br>
             <div class="col-lg-12"
      style="border: 1px solid grey; border-radius: 8px; height: 300px; margin-top: 40px; position: relative; background: #f8f8f8;"
      id="chart">
@@ -109,14 +117,14 @@
         " label="<%= stocks[0].price %>" title="<%= Number(stocks[0].price).toLocaleString() %>"></div>
     </div>
         </div>
-        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 400px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;">
+        <div class="col-lg-6" style="border-bottom: 1px solid black;border-right: 1px solid black;border-left: 1px solid black;height: 750px;margin-top: 20px;margin-bottom: 20px;border-radius: 8px;">
             <div class="row">
                 <strong>ارزش شرکت: <%= net_worth %>T</strong>
             </div>
             <br><br>
             <div class="row" style="color: <%= color %>;float: right;">
-                <strong>
-                    سود: %<%= String(p*100).substring(0, 4) %><%= sign %>
+                <strong dir="rtl">
+                    سود: %<span dir="ltr"><%= (String(p*100).split(".")[0]) %>.<% if(String(p*100).split(".")[1]) { %><%= String(p*100).split(".")[1].substring(0, 2) %> <% } %></span><%= sign %>
                 </strong>
             </div>
             <br><br></br>

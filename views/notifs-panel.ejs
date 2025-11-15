@@ -632,14 +632,16 @@
                                                 <% nagh = "پیامی موجود نیست" %>
                                             <% } %>
                                         <% } %>
-                                        <%= nagh %>
+                                        <%= (nagh == "") ? "پیامی موجود نیست" : nagh %>
                                     </div>
                                 </div>
                             </div>
                     </div>
                 </div>
+                <br><br><br>
                 <div class="chat-sidebar">
-                    <div class="chat-header" style="text-align: right;">
+                    <% if(finalee) { %>  
+                        <div class="chat-header" style="text-align: right;">
                         ارسال اطلاعات
                     </div>
                     <div class="char-list" style="padding: 20px;">
@@ -684,6 +686,8 @@
                             </button>
                         </form>
                     </div>
+                </div>
+                    <% } %>
                 </div>
             </div>
         </div>

@@ -62,7 +62,7 @@ app.get("/", async (req, res)=>{
         const n = team.net_worth;
         let p = "";
         let p_net = await pn.find({team_id: team._id}).lean();
-
+        let sdw = "123.13";
 
 
         //d
@@ -149,9 +149,6 @@ app.post("/admin/login", async (req, res)=>{
 app.get("/admin/panel", async (req, res)=>{
     if(!logout) req.session.user = null;
     if(req.session.user && req.session.user.status == "admin"){
-        
-        
-        
         const teams = await Team.find().lean();
         const stocks = await Stocks.find().lean();
         const notifs = await Notification.find().lean();
@@ -160,9 +157,6 @@ app.get("/admin/panel", async (req, res)=>{
         const the_dudes = [];
         for(let i = 0;i < infos.length;i++){
             const the_dude = await User.findById(infos[i].user_id);
-
-            
-
             the_dudes.push(the_dude);
         }
 
@@ -189,9 +183,11 @@ app.get("/admin/panel", async (req, res)=>{
         }
 
         const wanna = await signers.find();
-        
+        const fi = process.env.FI;
+        const grf = process.env.GRF;
+        const brf = process.env.BRF;
 
-        res.render("adminpanel.ejs", {"user": req.session.user, "teams": teams, "stocks": stocks, "notifs": notifs, "reports": reports, "reports_users": users, "the_dudes": the_dudes, "infos": infos, "offers": adw, "wanna": wanna});
+        res.render("adminpanel.ejs", {"user": req.session.user, "teams": teams, "stocks": stocks, "notifs": notifs, "reports": reports, "reports_users": users, "the_dudes": the_dudes, "infos": infos, "offers": adw, "wanna": wanna, "finalee": fi, "grf": grf, "brf": brf});
     }else{
         res.redirect("/login");
     }
@@ -362,7 +358,9 @@ app.get("/communication", async (req, res)=>{
             user_id: req.session.user._id,
         }).lean();
 
-        res.render("notifs-panel.ejs", {"user": req.session.user, "notifs": notifs, "messages": messages, "nagh": ""});
+        const finalee = (process.env.FI == "yes");
+
+        res.render("notifs-panel.ejs", {"user": req.session.user, "notifs": notifs, "messages": messages, "nagh": "", "finalee": finalee});
     }else{
         res.redirect("/login");
     }
@@ -419,14 +417,16 @@ app.get("/rankings", async (req, res)=>{
 app.get("/signup", async (req, res)=>{
 
     const number = (await signers.find()).length;
-    const allowed = (number <= 16);
+    const allowed = (number < 32);
+    const brf = process.env.BRF;
+    const grf = process.env.GRF;
 
-    res.render("signup.ejs", {"allowed": allowed});
+    res.render("signup.ejs", {"allowed": allowed, "brf": brf, "grf": grf});
 })
 app.post("/make_account", upload.single("picture"), async (req, res)=>{
     
     const number = (await signers.find()).length;
-    if(number > 16){
+    if(number > 32){
         io.emit("no more space");
         return;
     }
@@ -900,8 +900,12 @@ io.on("connection", (socket)=>{
             users.push(u);
         }
 
+        let ms = await Reprots.find({
+            user_id: user_id
+        }).lean();
+
         io.emit("report sent admin", ([reports, users]));
-        socket.emit("report sent", "کاربر گرامی پیام شما به ادمین ها منتقل شده و در اصرع وقت بررسی میشود.");
+        socket.emit("report sent", ms);
     });
     socket.on("fetch report", async (id)=>{
         const reports = await Reprots.find({
@@ -1250,6 +1254,27 @@ io.on("connection", (socket)=>{
         io.emit("offer declined announcment", ([o.offerer, o.reciver]));
     });
 
+    socket.on("get the prices", async ()=>{
+        const ss = await Stocks.findOne({
+            name: "دلار"
+        }).lean();
+        socket.emit("got the prices", ss);
+    });
+    socket.on("change the finalee", (current)=>{
+        console.log(String(current).trim());
+        console.log((String(current).trim() == "no") ? "yes" : "no");
+        process.env.FI = (String(current).trim() == "no") ? "yes" : "no";
+    });
+    socket.on("change the brf", (current)=>{
+        console.log(String(current).trim());
+        console.log((String(current).trim() == "no") ? "yes" : "no");
+        process.env.BRF = (String(current).trim() == "no") ? "yes" : "no";
+    });
+    socket.on("change the grf", (current)=>{
+        console.log(String(current).trim());
+        console.log((String(current).trim() == "no") ? "yes" : "no");
+        process.env.GRF = (String(current).trim() == "no") ? "yes" : "no";
+    })
 });
 
 

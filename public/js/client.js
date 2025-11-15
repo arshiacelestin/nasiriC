@@ -1,4 +1,5 @@
 const socket = io();
+let chart;
 
 $(document).ready(()=>{
     $(document).on("click", "#maketeam", function(e){
@@ -265,6 +266,11 @@ $(document).ready(()=>{
                 html += `<div style='position: absolute;bottom: 0;left: ${i * 20 + 5}px;width: 10px;background-color:${(prices[i] > prices[i - 1]) ? "Green" : "Red"};height: ${prices[i]/800}px;' title='${Number(prices[i]).toLocaleString()}'></div>`;
             }
             html += `<div style='position: absolute;bottom: 0;left: ${prices.length * 20 + 5}px;width: 10px;background-color:${(current_price > prices[prices.length-1]) ? "Green" : "Red"};height: ${current_price/800}px;' title='${Number(current_price).toLocaleString()}'></div>`
+            
+            prices.push(current_price)
+            chart.data.datasets[0].data = prices;
+            chart.update();
+
             $("#chart").html(html);
     });
     socket.on("info for table", (stocks)=>{
@@ -329,16 +335,33 @@ $(document).ready(()=>{
     $(document).on("click", "#sendMessage", function(){
         if($("#postInput").val() != ""){
             socket.emit("new report", ([$("#postInput").val(), $("#user").attr("content")]));
-            socket.on("report sent", (txt)=>{
-                alert(txt);
-                window.location.reload();
+            socket.on("report sent", (messages)=>{
+                let html = "";
+                let lastMessage = "";
+                for(let i = 0;i < messages.length;i++){
+                    if(messages[i].report != "boobool talai"){
+                        html += `<div class='message sent'>${messages[i].report}</div>`;
+                    }else{
+                        html += `<div class='message received' style='background-color: olive;'>${messages[i].answer}</div>`
+                    }
+                }
+
+                for(let i = 0;i < messages.length;i++){
+                    if(messages[i].report == "boobool talai"){
+                        lastMessage = messages[i].answer;
+                    }else{
+                        lastMessage = messages[i].report;
+                    }
+                }
+
+                $("#chatMessages").html(html);
+                $(".chat-preview").html(lastMessage);
             })
         }
     });
     $(document).on("click", ".speak", function(){
         socket.emit("fetch report", $(this).attr("rid"));
         socket.on("reports fetched", ([reports, user])=>{
-            
             let html = "<div class='col-lg-12' id='close'>خروج</div>";
             for(let i = 0;i < reports.length;i++){
                 html += `<div style='width: 100%;background-color: whitesmoke'>${user.username}: ${reports[i].report}</div><br><br>`;
@@ -348,23 +371,28 @@ $(document).ready(()=>{
             $("#conv").css("display", "block");
         });
     });
+    let pleasehelpme = 
     $(document).on("click", "#answer", function(){
         let answer = $("#admin_a").val();
-        let user_id = $(this).attr("uid");
-        socket.emit("admin sent answer", ([answer, user_id]));
-        socket.on("answers saved", (reports)=>{
-            if(window.location == "https://nasiric.onrender.com/communication"){
+        pleasehelpme = $(this).attr("uid");
+        socket.emit("admin sent answer", ([answer, pleasehelpme]));
+    });
+    socket.on("answers saved", (reports)=>{     
+            if($("#uid_n").attr("content") == reports[0].user_id){
                 let html = "";
                 for(let i = 0;i < reports.length;i++){
-                    html += `<div class='message sent'>${reports[i].report}</div>`;
+                    if(reports[i].report == "boobool talai"){
+                        html += `<div class='message received' style='background-color: olive;'>${reports[i].answer}</div>`
+                    }else{
+                        html += `<div class='message sent'>${reports[i].report}</div>`
+                    }
                 }
-                html += `<div class='message received' style='background: grey;'>${reports[0].answer}</div>`
                 $("#chatMessages").html(html);
+                $(".chat-preview").html((reports[reports.length-1].report == "boobool talai") ? reports[reports.length-1].answer : reports[reports.length-1].report);
                 let audio = new Audio("notif.mp3");
                 audio.play();
             }
         });
-    });
     socket.on("report sent admin", ([reports, users])=>{
         if(window.location == "https://nasiric.onrender.com/admin/panel"){
             let html = "";
@@ -629,5 +657,41 @@ $(document).ready(()=>{
 
         }
     });
+
+
+    if(window.location == "http://127.0.0.1:8080/"){
+        socket.emit("get the prices");
+        socket.on("got the prices", (stock)=>{
+            stock.priceHistory.push(stock.price);
+            chart = new Chart(document.getElementById("canv").getContext("2d"), {
+    type: "line",
+    data: {
+        labels: stock.priceHistory.map((v, i) => (i+1)),   
+        datasets: [{
+            label: "Price",
+            data: stock.priceHistory.map(Number),
+            borderWidth: 3,
+            borderColor: "black",      
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+        });
+    }
+
+    $(document).on("click", "#fi", function(){
+        socket.emit("change the finalee", ($(this).html()));
+    });
+    $(document).on("click", "#brf", function(){
+        socket.emit("change the brf", $(this).html());
+    });
+    $(document).on("click", "#grf", function(){
+        socket.emit("change the grf", $(this).html());
+    });
+
 });
 
