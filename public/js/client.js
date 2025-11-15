@@ -659,7 +659,7 @@ $(document).ready(()=>{
     });
 
 
-    if(window.location == "http://127.0.0.1:8080/"){
+    if(window.location == "https://nasiric.onrender.com/"){
         socket.emit("get the prices");
         socket.on("got the prices", (stock)=>{
             stock.priceHistory.push(stock.price);
