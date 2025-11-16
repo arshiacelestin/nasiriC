@@ -367,7 +367,7 @@ app.get("/communication", async (req, res)=>{
 });
 
 app.get("/make-stock", (req, res)=>{
-    if(req.session.user){
+    if(req.session.user && req.session.user.status == "admin"){
         res.render("mstock.ejs", {"user": req.session.user});
     }else{
         res.redirect("/login");
@@ -869,9 +869,9 @@ io.on("connection", (socket)=>{
         await notif.save();
         socket.emit("notif uploaded", "پیام برای کاربران در پنل ارتباطات قرار گرفت.");
 
-        const notifs = await Notification.find().lean();
+        const notifs = await Notification.find().sort({createdAt: -1}).lean();
+        console.log(notifs);
         io.emit("notifs changed", (notifs));
-
     });
     socket.on("remove notif", async (id)=>{
         const r = await Notification.findByIdAndDelete(id);

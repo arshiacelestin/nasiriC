@@ -635,7 +635,11 @@ $(document).ready(()=>{
         }
         
         
-        alert("لطفا تا دریافت پیام اعلام نتیجه از سایت خارج نشوید.");
+        alert("لطفا تا دریافت پیام اعلام نتیجه از سایت خارج نشوید.(این ممکن است کمی طول بکشد!)");
+        $("#first_phone").val("");
+        $("#second_phone").val("");
+        $("#third_phone").val("");
+        $("#team_name").val("")
         $.ajax({
             type: "post",
             url: "/make_account",

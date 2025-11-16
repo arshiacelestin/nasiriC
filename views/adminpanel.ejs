@@ -329,7 +329,11 @@
             <table border="3px" style="background-color: whitesmoke;width: 100%;" id="reports_here">
                 <tr><th>نام کاربر</th><th>پیام</th><th>صحبت</th></tr>
                 <% for(let i = 0;i < reports.length;i++) { %>
-                    <tr><td><%= reports_users[i].username %></td><td><%= reports[i].report %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
+                    <% if(reports[i].report != "boobool talai") { %>
+                        <tr><td><%= reports_users[i].username %></td><td><%= reports[i].report %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
+                    <% }else{ %>
+                        <tr><td><%= reports_users[i].username %></td><td><%= reports[i].answer %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
+                    <% } %>
                 <% } %>
             </table>
         </div>
