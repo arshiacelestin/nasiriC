@@ -260,7 +260,7 @@ $(document).ready(()=>{
         let id = $(this).val();
         socket.emit("fetch prices", id);
     });
-    socket.on("prices fetched", ([prices, current_price])=>{
+    socket.on("prices fetched", ([prices, current_price, s, rest])=>{
             let html = "";
             for(let i =0;i < prices.length;i++){
                 html += `<div style='position: absolute;bottom: 0;left: ${i * 20 + 5}px;width: 10px;background-color:${(prices[i] > prices[i - 1]) ? "Green" : "Red"};height: ${prices[i]/800}px;' title='${Number(prices[i]).toLocaleString()}'></div>`;
@@ -271,6 +271,13 @@ $(document).ready(()=>{
             chart.data.datasets[0].data = prices;
             chart.update();
 
+            let fs = `<option value='${s._id}'>${s.name}</option>`;
+            for(let i = 0;i < rest.length;i++){
+                fs += `<option value='${rest[i]._id}'>${rest[i].name}</option>`;
+            }
+            $("#display_stocks").html(fs);
+            
+
             $("#chart").html(html);
     });
     socket.on("info for table", (stocks)=>{
@@ -279,7 +286,7 @@ $(document).ready(()=>{
         for(let i = 0;i < stocks.length;i++){
             html += `<tr><td class="item-name" style="padding: 8px;">${stocks[i].name}></td><td class="price" style="padding: 8px;">${stocks[i].price.toLocaleString()}</td><td class="price" style="padding: 8px;">${stocks[i].priceHistory[stocks[i].priceHistory.length-1].toLocaleString()}</td><td style="padding: 8px;color: ${(stocks[i].price >= stocks[i].priceHistory[stocks[i].priceHistory.length - 1]) ? 'Green' : 'Red'};"><strong>${((stocks[i].price - stocks[i].priceHistory[stocks[i].priceHistory.length - 1])/(stocks[i].priceHistory[stocks[i].priceHistory.length - 1]))*100}</strong></td></tr>`
         }
-        $("#lastUpdate").html(`آخرین بروزرسانی: ${Date.now}`);
+        //$("#lastUpdate").html(`آخرین بروزرسانی: ${Date.now()}`);
         $("#table-body").html(html);
     });
     $(document).on("click", "#add_news", function(){
@@ -293,7 +300,6 @@ $(document).ready(()=>{
         socket.emit("remove notif", $(this).attr("nid"));
         socket.on("notif removed", (txt)=>{
             alert(txt);
-            window.location.reload();
         })
     });
     
@@ -356,6 +362,7 @@ $(document).ready(()=>{
 
                 $("#chatMessages").html(html);
                 $(".chat-preview").html(lastMessage);
+                $("#postInput").val("");
             })
         }
     });
@@ -663,7 +670,7 @@ $(document).ready(()=>{
     });
 
 
-    if(window.location == "https://nasiric.onrender.com/"){
+    if(window.location == "http://127.0.0.1:8080/"){
         socket.emit("get the prices");
         socket.on("got the prices", (stock)=>{
             stock.priceHistory.push(stock.price);
@@ -697,5 +704,48 @@ $(document).ready(()=>{
         socket.emit("change the grf", $(this).html());
     });
 
+    $(document).on("click", ".dec", function(){
+        socket.emit("decline this offer A", ($(this).attr("id")));
+        socket.on("offer deline worked", ()=>{
+            alert("درخواست با موفقیت حذف شد.");
+        });
+    });
+
+    let c;
+    $(document).on("change", "#sfp", function(){
+        let id = $(this).val();
+        c = id;
+        socket.emit("fetch the data for the new thing", (id));
+        socket.on("got it now", (s)=>{
+            $("#howmuchnow").html(`price: ${Number(s.price).toLocaleString()}`);
+        });
+    });
+
+    $(document).on("click", "#increase", function(){
+        let amount = $("#percent").val();
+        if(amount < 0){
+            if(Math.abs(amount) <= 0 || Math.abs(amount) >= 100){
+                alert("لطفا مقادیر را به درستی وارد کنید.");
+                return;
+            }
+            socket.emit("reduce by percentage", ([amount, $("#sfp").val()]));
+            socket.on("updated the price", (price)=>{
+                $("#howmuchnow").html(`price: ${price.toLocaleString()}`);
+                alert("قیمت آپدیت شد.");
+            });
+        }else{
+            socket.emit("increase by percentage", ([amount, $("#sfp").val()]));
+            socket.on("update the price I", (price)=>{
+                $("#howmuchnow").html(`price: ${price.toLocaleString()}`);
+                alert("قیمت آپدیت شد.");
+            });
+        }
+    });
+    $(document).on("click", "#dr", function(){
+        socket.emit("dr", ($(this).html()));
+    });
+    $(document).on("click", "#rp", function(){
+        socket.emit("rp", ($(this).html()));
+    });
 });
 

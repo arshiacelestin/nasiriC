@@ -367,7 +367,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-12 status-card" style="background: rgba(255, 255, 255, 0.1);color: black;">
+            <% if(finalee == "yes") { %>
+                <div class="col-lg-12 status-card" style="background: rgba(255, 255, 255, 0.1);color: black;">
                 <div class="col-lg-6">
                     <h2 style="text-align: center;">
                         ارسال درخواست
@@ -551,6 +552,7 @@
                     
                 </div>
             </div>
+            <% } %>
         </div>
         
         <!-- نمودار تغییرات -->

@@ -57,11 +57,13 @@
             </a>
         </div>
         <div class="col-lg-6" style="float: left;">
-            <a href="/rankings" class="black">
+            <% if(String(DR).trim() == "yes") { %>
+                <a href="/rankings" class="black">
                 <button type="button" class="btn btn-success col-lg-6 col-lg-push-1">
                     جدول رتبه بندی
                 </button>
             </a>
+            <% } %>
             <a href="/communication" style="color: black;">
                 <button type="button" class="btn btn-success col-lg-4 col-lg-push-1">
                     اعلانات
@@ -76,6 +78,7 @@
             </div>
             <div class="col-lg-10">
                 <select name="stock_name" id="display_stocks" class="form-control">
+                <option value="<%= first._id %>"><%= first.name %></option>
                 <% for(let i = 0;i < stocks.length;i++) { %>
                     <option value="<%= stocks[i]._id %>"><%= stocks[i].name %></option>
                 <% } %>
@@ -99,7 +102,7 @@
             left: <%= i * 20 + 5 %>px;
             width: 10px;
             background-color: <%= stocks[0].priceHistory[i] > stocks[0].priceHistory[i - 1] ? 'green' : 'red' %>;
-            height: <%= stocks[0].priceHistory[i] / 800 %>px;
+            height: <%= ((stocks[0].priceHistory[i] / 800) > 300) ? 300 : stocks[0].priceHistory[i] / 800 %>px;
         " title="<%= Number(stocks[0].priceHistory[i]).toLocaleString() %>"></div>
     <% } %>
         <div style="

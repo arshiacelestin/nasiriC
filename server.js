@@ -102,7 +102,12 @@ app.get("/", async (req, res)=>{
         color = (p > 0 && p != 0) ? "Green" : "Red";
         sign = (p > 0 && p != 0) ? "+" : "";
 
-        const stocks = await Stocks.find().lean();
+        const stocks = await Stocks.find({
+            name: {$ne: "دلار"}
+        }).lean();
+        const first = await Stocks.findOne({
+            name: "دلار"
+        });
 
         let number_of_notifs = 0;
         const notifs = await Notification.find().lean();
@@ -110,7 +115,7 @@ app.get("/", async (req, res)=>{
             number_of_notifs++;
         }
 
-        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "p": p, "color": color, "sign": sign, "stocks": stocks, "non": number_of_notifs, "team_id": team._id});
+        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "p": p, "color": color, "sign": sign, "stocks": stocks, "non": number_of_notifs, "team_id": team._id, "DR": process.env.DR, "first": first, "other": stocks});
     }else{
         res.redirect("/login");
     }
@@ -186,8 +191,12 @@ app.get("/admin/panel", async (req, res)=>{
         const fi = process.env.FI;
         const grf = process.env.GRF;
         const brf = process.env.BRF;
+        const rp = process.env.CIH;
+        const dr = process.env.DR;
 
-        res.render("adminpanel.ejs", {"user": req.session.user, "teams": teams, "stocks": stocks, "notifs": notifs, "reports": reports, "reports_users": users, "the_dudes": the_dudes, "infos": infos, "offers": adw, "wanna": wanna, "finalee": fi, "grf": grf, "brf": brf});
+        
+
+        res.render("adminpanel.ejs", {"user": req.session.user, "teams": teams, "stocks": stocks, "notifs": notifs, "reports": reports, "reports_users": users, "the_dudes": the_dudes, "infos": infos, "offers": adw, "wanna": wanna, "finalee": fi, "grf": grf, "brf": brf, "dr": dr, "rp": rp});
     }else{
         res.redirect("/login");
     }
@@ -346,7 +355,7 @@ app.get("/management-panel", async (req, res)=>{
 
     
 
-        res.render("management-panel.ejs", {"team": team, "user": req.session.user, "stocks": stocks, "team_stocks": team_stocks, "transactions": transes, "ts_names": stock_names, "ts_prices": stock_prices, "trs_names": trs_names, "trs_prices": trs_prices, "trs_users": trs_users, "tsq": total_stock_quantity, "net_value": net_value, "profit": profit, "teams": tms, "sent": sent, "recived": recived});
+        res.render("management-panel.ejs", {"team": team, "user": req.session.user, "stocks": stocks, "team_stocks": team_stocks, "transactions": transes, "ts_names": stock_names, "ts_prices": stock_prices, "trs_names": trs_names, "trs_prices": trs_prices, "trs_users": trs_users, "tsq": total_stock_quantity, "net_value": net_value, "profit": profit, "teams": tms, "sent": sent, "recived": recived, "finalee": process.env.FI});
     }else{
         res.redirect("/login");
     }
@@ -530,7 +539,10 @@ io.on("connection", (socket)=>{
         })
         u.save();
         const stock_new = await Stocks.findById(id);
-        io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price]));
+        const the_rest = await Stocks.find({
+            _id: { $ne: id }
+        });
+        io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price, s, the_rest]));
 
         const stocks = await Stocks.find().lean();
         io.emit("info for table", (stocks));
@@ -546,7 +558,7 @@ io.on("connection", (socket)=>{
                 user_id: users[i]._id
             });
             const rep = await Reprots.deleteMany({
-                user_id: users[i]._id
+                user_id: new mongoose.Types.ObjectId(users[i]._id)
             });
             const inf = await Info.deleteMany({
                 user_id: new mongoose.Types.ObjectId(users[i]._id)
@@ -622,6 +634,7 @@ io.on("connection", (socket)=>{
         }
         if(check_net_worth && check_enough_stocks){
             for(let i = 0;i < ids.length;i++){
+                ids.map(id => new mongoose.Types.ObjectId(id));
                 const stock = await Stocks.findById(ids[i]).lean();
                 const requested = s_quantity[i];
                 const new_q = stock.quantity - requested;
@@ -629,6 +642,8 @@ io.on("connection", (socket)=>{
                 const new_price = Math.round(stock.price + (stock.price * delta)/1000);
                 console.log(`${stock.name} was ${stock.price} after changes it is ${new_price}`);
                 console.log("===========================================");
+
+                
 
                 const tc = new Transactions({
                     stock_id: stock._id,
@@ -640,8 +655,30 @@ io.on("connection", (socket)=>{
                     operation: "buy"
                 });
                 await tc.save();
+                const changed = (stock.price * delta)/1000;
 
+                if(process.env.CIH == "yes"){
+                    const the_rest = await Stocks.find({
+                        _id: {$nin: ids}
+                    });
 
+                    for(let k = 0;k < the_rest.length;k++){
+                        const n = the_rest[k];
+                        const current_pr = n.price;
+                        const now_pr = Math.round(current_pr - changed);
+                        const ph = the_rest[k].priceHistory;
+                        if(ph.length > 28){
+                            ph.splice(0, 1);
+                            ph.push(now_pr);
+                        }else{
+                            ph.push(now_pr);
+                        }
+                        const unumf = await Stocks.findByIdAndUpdate(n._id, {
+                            price: now_pr,
+                            priceHistory: ph
+                        });
+                    }
+                }
 
                 stock.priceHistory.push(stock.price);
 
@@ -768,6 +805,26 @@ io.on("connection", (socket)=>{
             
             if(new_price <= 0){
                 new_price = 1;
+            }
+
+            const changed = stock.price - new_price;
+
+            const the_rest = await Stocks.find({
+                _id: { $nin: ids }
+            });
+            for(let i = 0;i < the_rest.length;i++){
+                const npfr = the_rest[i].price + changed;
+                const ph = the_rest[i].priceHistory;
+                if(ph > 28){
+                    ph.splice(0, 1);
+                    ph.push(the_rest[i].price);
+                }else{
+                    ph.push(the_rest[i].price);
+                }
+                const ufns = await Stocks.findByIdAndUpdate(the_rest[i]._id, {
+                    price: npfr,
+                    priceHistory: ph
+                });
             }
 
             stock.priceHistory.push(stock.price);
@@ -1274,7 +1331,76 @@ io.on("connection", (socket)=>{
         console.log(String(current).trim());
         console.log((String(current).trim() == "no") ? "yes" : "no");
         process.env.GRF = (String(current).trim() == "no") ? "yes" : "no";
-    })
+    });
+
+    socket.on("decline this offer A", async (id)=>{
+        const r = await offer.deleteOne(new mongoose.Types.ObjectId(id));
+        socket.emit("offer deline worked");
+    });
+    socket.on("fetch the data for the new thing", async (id)=>{
+        const s = await Stocks.findById(id);
+        socket.emit("got it now", (s));
+    });
+    socket.on("reduce by percentage", async ([amount, id])=>{
+        const s = await Stocks.findById(new mongoose.Types.ObjectId(id));
+        let current = s.price;
+        console.log(amount);
+        let after = ((100 + Number(amount))/100) * current;
+        const priceHis = s.priceHistory;
+        if(priceHis.length > 28){
+            priceHis.splice(0, 1);
+            priceHis.push(current);
+        }else{
+            priceHis.push(current);
+        }
+        console.log(after);
+        const u = await Stocks.findByIdAndUpdate(id, {
+            price: Number(String(after).split(".")[0]),
+            priceHistory: priceHis
+        });
+        socket.emit("updated the price", Number(String(after).split(".")[0]));
+    });
+    socket.on("increase by percentage", async ([amount, id])=>{
+        const s = await Stocks.findById(id);
+        const current = s.price;
+        const after = ((100 + Number(amount))/100) * current;
+        const priceHis = s.priceHistory;
+        if(priceHis.length > 28){
+            console.log("if");
+            priceHis.splice(0, 1);
+            priceHis.push(current);
+            console.log(priceHis)
+        }else{
+            console.log("else");
+            priceHis.push(current);
+            console.log(priceHis);
+        }
+        console.log(((100 + amount)/100));
+        console.log(after);
+        const u = await Stocks.findByIdAndUpdate(id, {
+            price: Number(String(after).split(".")[0]),
+            priceHistory: priceHis
+        });
+        const the_rest = await Stocks.find({
+            _id: {$ne: id}
+        });
+        io.emit("prices fetched", ([priceHis, current, s, the_rest]));
+        socket.emit("update the price I", (Number(String(after).split(".")[0])));
+    });
+    socket.on("dr", (now)=>{
+        if(String(now).trim() == "yes"){
+            process.env.DR = "no";
+        }else{
+            process.env.DR = "yes";
+        }
+    });
+    socket.on("rp", (now)=>{
+        if(String(now).trim() == "yes"){
+            process.env.CIH = "no";
+        }else{
+            process.env.CIH = "yes";
+        }
+    });
 });
 
 

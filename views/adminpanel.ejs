@@ -253,6 +253,24 @@
             </form>
             <br><br><br><br>
             <h2 style="text-align: center;border-bottom: 1px solid grey;">
+                بروزرسانی درصدی
+            </h2>
+            <div class="col-lg-12">
+                <select name="s" id="sfp" class="form-control">
+                    <% for(let i = 0;i < stocks.length;i++){  %>
+                        <option value="<%= stocks[i]._id %>"><%= stocks[i].name %></option>
+                    <% } %>
+                </select>
+                <br><br>
+                <label for="" id="howmuchnow">price: <%= Number(stocks[0].price).toLocaleString() %></label>
+                <label for="">درصد افزایش: </label>
+                <input type="text" class="form-control" id="percent">
+                <button class="btn btn-primary col-lg-2 col-lg-push-5" id="increase"></button>
+                    افزایش
+                </button>
+            </div>
+            <br><br><br><br>
+            <h2 style="text-align: center;border-bottom: 1px solid grey;">
                 حذف استاک
             </h2>
             <form action="" method="post" class="form-group">
@@ -332,7 +350,7 @@
                     <% if(reports[i].report != "boobool talai") { %>
                         <tr><td><%= reports_users[i].username %></td><td><%= reports[i].report %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
                     <% }else{ %>
-                        <tr><td><%= reports_users[i].username %></td><td><%= reports[i].answer %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
+                        <tr><td>شما</td><td><%= reports[i].answer %></td><td><div class="btn btn-success speak" rid="<%= reports[i].user_id %>"><div class="fa fa-plus"></div></div></td></tr>
                     <% } %>
                 <% } %>
             </table>
@@ -358,9 +376,9 @@
             درخواست ها
         </h2>
         <table border="3px" style="background-color: whitesmoke;width: 100%;">
-            <tr><th>از</th><th>به</th><th>وضعیت</th><th>تایید</th><th>حذف</th></tr>
+            <tr><th>id</th><th>از</th><th>به</th><th>وضعیت</th><th>تایید</th><th>حذف</th></tr>
             <% for(let i = 0;i < offers["offerer"].length;i++) { %>
-                <tr><td><%= offers["offerer"][i] %></td><td><%= offers["reciver"][i] %></td><td><%= offers["state"][i] %></td><td><div class="btn btn-success conf" id="<%= offers['id'][i] %>">
+                <tr><td><%= offers["id"][i] %></td><td><%= offers["offerer"][i] %></td><td><%= offers["reciver"][i] %></td><td><%= offers["state"][i] %></td><td><div class="btn btn-success conf" id="<%= offers['id'][i] %>">
                     تایید
                 </div></td><td>
                     <div class="btn btn-danger dec" id="<%= offers['id'][i] %>">
@@ -395,6 +413,19 @@
     <div class="col-lg-12">
 
     </div>
+    <label for="" class="col-lg-4">قیمت های رندوم: </label>
+    <button class="col-lg-4" id="rp">
+        <%= rp %>
+    </button>
+    <br><br><br>
+    <div class="col-lg-12">
+         
+    </div>
+    <label for="" class="col-lg-4">نمایش جدول رده بندی</label>
+    <button class="col-lg-4" id="dr">
+        <%= dr %>
+    </button>
+    <br><br><br>
     <div class="col-lg-12">
         <h2 style="text-align: center;border-bottom: 1px solid grey;margin-top: 48px;">
             ثبت نام ها
