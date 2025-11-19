@@ -261,6 +261,7 @@ app.get("/management-panel", async (req, res)=>{
         for(let i = 0;i < transes.length;i++){
             const trs = await Stocks.findById(transes[i].stock_id);
             const trs_user = await User.findById(transes[i].user_id);
+            console.log(trs_user);
             trs_names.push(trs.name);
             trs_prices.push(trs.price);
             trs_users.push(trs_user);

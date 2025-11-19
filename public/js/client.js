@@ -336,6 +336,7 @@ $(document).ready(()=>{
             let audio = new Audio("notif.mp3");
             audio.play();
         }
+        alert("کاربر گرامی یک نوتیف جدید برای شما قرار داده شده است\n لطفا برای مشاهده آن به بخش اعلانات مراجعه کنید.");
         
     });
     $(document).on("click", "#sendMessage", function(){
