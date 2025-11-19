@@ -64,13 +64,25 @@ app.get("/", async (req, res)=>{
         let p_net = await pn.find({team_id: team._id}).lean();
         let sdw = "123.13";
 
+        
 
         //d
         p_net = p_net[0].pn;
 
         p = (n-p_net)/(p_net);
 
-        
+        let s = await TeamStock.find({
+            team_id: team._id
+        });
+        let val = 0;
+        for(let a = 0; a < s.length;a++){
+            let w = await Stocks.findById(s[a].stock_id).lean();
+            console.log(w);
+            val += s[a].quantity * w.price;
+            console.log(val);
+        }
+        val += team.net_worth;
+        let our_profit = parseFloat((((val - 5000000)/5000000)*100).toFixed(2));
 
         let color = "none";
         let sign = "";
@@ -115,7 +127,7 @@ app.get("/", async (req, res)=>{
             number_of_notifs++;
         }
 
-        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "p": p, "color": color, "sign": sign, "stocks": stocks, "non": number_of_notifs, "team_id": team._id, "DR": process.env.DR, "first": first, "other": stocks});
+        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "p": p, "color": color, "sign": sign, "stocks": stocks, "non": number_of_notifs, "team_id": team._id, "DR": process.env.DR, "first": first, "other": stocks, "our": our_profit});
     }else{
         res.redirect("/login");
     }
@@ -640,10 +652,20 @@ io.on("connection", (socket)=>{
                 const requested = s_quantity[i];
                 const new_q = stock.quantity - requested;
                 const delta = stock.quantity - new_q;
-                const new_price = Math.round(stock.price + (stock.price * delta)/1000);
+                const new_price = Math.round(stock.price + (stock.price * delta)/1000000000000000000);
                 console.log(`${stock.name} was ${stock.price} after changes it is ${new_price}`);
                 console.log("===========================================");
-
+                if(new_price <= 0 ){
+                    const sto = await Stocks.findByIdAndUpdate(ids[i], {
+                        price: 1
+                    });
+                }else{
+                    const u = await Stocks.findByIdAndUpdate(ids[i], {
+                        price: new_price,
+                        quantity: new_q,
+                        priceHistory: stock.priceHistory
+                    });
+                }
                 
 
                 const tc = new Transactions({
@@ -690,11 +712,7 @@ io.on("connection", (socket)=>{
 
                 console.log(stock.priceHistory.slice(0, 2));
 
-                const u = await Stocks.findByIdAndUpdate(ids[i], {
-                    price: new_price,
-                    quantity: new_q,
-                    priceHistory: stock.priceHistory
-                });
+                
                 
                 /*const p = await pn.updateOne({
                     team_id: team._id
@@ -799,7 +817,7 @@ io.on("connection", (socket)=>{
 
             const new_q = sold_quantity + Number(stock.quantity);
             const delta = new_q - Number(stock.quantity);
-            let new_price = Math.round(stock.price - (stock.price * delta)/1000);
+            let new_price = Math.round(stock.price - (stock.price * delta)/1000000000000000000);
             console.log(`${stock.name} was valued at ${stock.price} and now it is ${new_price}`);
             console.log("\n");
             console.log(`the quantity was ${stock.quantity} and  now it is ${new_q}`)
