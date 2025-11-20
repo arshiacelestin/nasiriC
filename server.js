@@ -273,7 +273,6 @@ app.get("/management-panel", async (req, res)=>{
         for(let i = 0;i < transes.length;i++){
             const trs = await Stocks.findById(transes[i].stock_id);
             const trs_user = await User.findById(transes[i].user_id);
-            console.log(trs_user);
             trs_names.push(trs.name);
             trs_prices.push(trs.price);
             trs_users.push(trs_user);
@@ -555,9 +554,11 @@ io.on("connection", (socket)=>{
         const the_rest = await Stocks.find({
             _id: { $ne: id }
         });
-        io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price, s, the_rest]));
+        //io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price, s, the_rest]));
+        io.emit("update the damn chart", (stock_new));
 
         const stocks = await Stocks.find().lean();
+
         io.emit("info for table", (stocks));
     });
     socket.on("remove team",async (team_id) => {
@@ -652,7 +653,16 @@ io.on("connection", (socket)=>{
                 const requested = s_quantity[i];
                 const new_q = stock.quantity - requested;
                 const delta = stock.quantity - new_q;
-                const new_price = Math.round(stock.price + (stock.price * delta)/1000000000000000000);
+                let new_price = Math.round(stock.price + (stock.price * delta)/1000);
+
+                const MAX_PCT = 0.05;
+                const PRICE_FLOOR = 1;
+
+                const hardMax = Math.round(stock.price * (1 + MAX_PCT / 100) * 100) / 100;
+                const hardMin = Math.round(Math.max(PRICE_FLOOR, stock.price * (1 - MAX_PCT / 100)) * 100) / 100;
+
+                new_price = Math.round(Math.min(Math.max(new_price, hardMin), hardMax));
+
                 console.log(`${stock.name} was ${stock.price} after changes it is ${new_price}`);
                 console.log("===========================================");
                 if(new_price <= 0 ){
@@ -660,6 +670,15 @@ io.on("connection", (socket)=>{
                         price: 1
                     });
                 }else{
+                    stock.priceHistory.push(stock.price);
+
+                    if(stock.priceHistory.length > 29){
+                        let start = stock.priceHistory.length - 29;
+                        stock.priceHistory = stock.priceHistory.slice(start, stock.priceHistory.length)
+                        console.log("ojhwaidhaoiwdhaoidhwaiodahwihdwhidaw");
+                        console.log(stock.priceHistory);
+                        console.log("ojhwaidhaoiwdhaoidhwaiodahwihdwhidaw");
+                    }
                     const u = await Stocks.findByIdAndUpdate(ids[i], {
                         price: new_price,
                         quantity: new_q,
@@ -678,7 +697,7 @@ io.on("connection", (socket)=>{
                     operation: "buy"
                 });
                 await tc.save();
-                const changed = (stock.price * delta)/1000;
+                const changed = new_price - stock.price;
 
                 if(process.env.CIH == "yes"){
                     const the_rest = await Stocks.find({
@@ -703,14 +722,8 @@ io.on("connection", (socket)=>{
                     }
                 }
 
-                stock.priceHistory.push(stock.price);
+                
 
-                if(stock.priceHistory.length > 29){
-                    let start = stock.priceHistory.length - 29;
-                    stock.priceHistory = stock.priceHistory.slice(start, stock.priceHistory.length)
-                }
-
-                console.log(stock.priceHistory.slice(0, 2));
 
                 
                 
@@ -721,7 +734,7 @@ io.on("connection", (socket)=>{
                 });*/
 
                 const t = await Team.findByIdAndUpdate(team._id, {
-                    net_worth: team.net_worth - sum
+                    net_worth: (team.net_worth - sum)
                 });
 
                 const has_had_before = await TeamStock.findOne({
@@ -751,8 +764,9 @@ io.on("connection", (socket)=>{
 
                 socket.emit("SBFU", "سهام های درخواست شده خریداری شد");
                 const stock_new = await Stocks.findById(ids[i]);
-                io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price]));
-                
+                //io.emit("prices fetched", ([stock_new.priceHistory, stock_new.price]));
+
+                io.emit("update the damn chart", (stock_new));
 
                 let value = 0;
                 for(let i = 0;i < team_stock_p.length;i++){
@@ -817,7 +831,16 @@ io.on("connection", (socket)=>{
 
             const new_q = sold_quantity + Number(stock.quantity);
             const delta = new_q - Number(stock.quantity);
-            let new_price = Math.round(stock.price - (stock.price * delta)/1000000000000000000);
+            let new_price = Math.round(stock.price - (stock.price * delta)/1000);
+
+            const MAX_PCT = 0.05; 
+            const PRICE_FLOOR = 1;
+
+            const hardMax = Math.round(stock.price * (1 + MAX_PCT / 100) * 100) / 100;
+            const hardMin = Math.round(Math.max(PRICE_FLOOR, stock.price * (1 - MAX_PCT / 100)) * 100) / 100;
+
+            new_price = Math.round(Math.min(Math.max(new_price, hardMin), hardMax));
+
             console.log(`${stock.name} was valued at ${stock.price} and now it is ${new_price}`);
             console.log("\n");
             console.log(`the quantity was ${stock.quantity} and  now it is ${new_q}`)
@@ -903,6 +926,7 @@ io.on("connection", (socket)=>{
             const stocks = await Stocks.find().lean();
             io.emit("info for table", (stocks));
 
+            io.emit("update the damn chart", (stock_new));
 
             const team_user = await Team.findById(team._id);
             const team_stock_p = await TeamStock.find({
@@ -1365,45 +1389,45 @@ io.on("connection", (socket)=>{
         let current = s.price;
         console.log(amount);
         let after = ((100 + Number(amount))/100) * current;
-        const priceHis = s.priceHistory;
-        if(priceHis.length > 28){
-            priceHis.splice(0, 1);
-            priceHis.push(current);
-        }else{
-            priceHis.push(current);
+        let priceHis = s.priceHistory;
+        priceHis.push(current);
+        if(priceHis.length > 29){
+            const start = priceHis.length - 29;
+            priceHis = priceHis.slice(start, priceHis.length);
+            // priceHis.splice(0, 1);
+            
         }
         console.log(after);
         const u = await Stocks.findByIdAndUpdate(id, {
             price: Number(String(after).split(".")[0]),
             priceHistory: priceHis
         });
+        const ow = await Stocks.find();
+        io.emit("info for table", ow);
         socket.emit("updated the price", Number(String(after).split(".")[0]));
     });
     socket.on("increase by percentage", async ([amount, id])=>{
         const s = await Stocks.findById(id);
         const current = s.price;
         const after = ((100 + Number(amount))/100) * current;
-        const priceHis = s.priceHistory;
-        if(priceHis.length > 28){
-            console.log("if");
-            priceHis.splice(0, 1);
-            priceHis.push(current);
-            console.log(priceHis)
-        }else{
-            console.log("else");
-            priceHis.push(current);
-            console.log(priceHis);
+        let priceHis = s.priceHistory;
+        priceHis.push(current);
+        if(priceHis.length > 29){
+            const start = priceHis.length - 29;
+            priceHis = priceHis.slice(start, priceHis.length);
+            // priceHis.splice(0, 1);
+            
         }
         console.log(((100 + amount)/100));
         console.log(after);
         const u = await Stocks.findByIdAndUpdate(id, {
             price: Number(String(after).split(".")[0]),
             priceHistory: priceHis
-        });
-        const the_rest = await Stocks.find({
-            _id: {$ne: id}
-        });
-        io.emit("prices fetched", ([priceHis, current, s, the_rest]));
+        }, {new: true});
+        io.emit("update the damn chart", (u));
+        const ow = await Stocks.find();
+        //io.emit("prices fetched", ([priceHis, current, s, the_rest]));
+        io.emit("info for table", ow);
         socket.emit("update the price I", (Number(String(after).split(".")[0])));
     });
     socket.on("dr", (now)=>{

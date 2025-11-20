@@ -274,7 +274,7 @@
                         </thead>
                         <tbody id="table-body">
                             <% for(let i = 0;i < stocks.length;i++) { %>
-                                <tr style="background-color: <% ((i % 2 == 0) ? 'grey' : 'whitesmoke') %>;padding: 8px;"><td class="item-name" style="padding: 8px;"><%= stocks[i].name %></td><td class="price" style="padding: 8px;"><%= stocks[i].price.toLocaleString() %></td><td class="price" style="padding: 8px;"><%= stocks[i].priceHistory[stocks[i].priceHistory.length-1].toLocaleString() %></td><td style="padding: 8px;color: black;color: <%= (stocks[i].price >= stocks[i].priceHistory[stocks[i].priceHistory.length - 1]) ? 'Green' : 'Red' %>;"><strong><%= String(((stocks[i].price - stocks[i].priceHistory[stocks[i].priceHistory.length - 1])/(stocks[i].priceHistory[stocks[i].priceHistory.length - 1]))*100).substring(0, 5) %>%</strong></td></tr>
+                                <tr style="background-color: <% ((i % 2 == 0) ? 'grey' : 'whitesmoke') %>;padding: 8px;"><td class="item-name" style="padding: 8px;"><%= stocks[i].name %></td><td class="price" style="padding: 8px;"><%= stocks[i].price.toLocaleString() %></td><td class="price" style="padding: 8px;"><%= stocks[i].priceHistory[stocks[i].priceHistory.length-1].toLocaleString() %></td><td style="padding: 8px;color: black;color: <%= (stocks[i].price >= stocks[i].priceHistory[stocks[i].priceHistory.length - 1]) ? 'Green' : 'Red' %>;"><strong><%= (((stocks[i].price - stocks[i].priceHistory[stocks[i].priceHistory.length - 1])/(stocks[i].priceHistory[stocks[i].priceHistory.length - 1]))*100).toFixed(2) %>%</strong></td></tr>
 
                             <% } %>
                         </tbody>
@@ -337,7 +337,7 @@
                                 سود شرکت: 
                             </span>
                             <span style="color: <%= (profit >= 0) ? 'rgb(70, 175, 70)':'red' %>;" id="profit_goes_here">
-                                <%= profit.toLocaleString() %>%
+                                <%= profit.toFixed(2) %>%
                             </span>
                         </div>
                     </div>

@@ -259,8 +259,7 @@ $(document).ready(()=>{
     $(document).on("change", "#display_stocks", function(){
         let id = $(this).val();
         socket.emit("fetch prices", id);
-    });
-    socket.on("prices fetched", ([prices, current_price, s, rest])=>{
+        socket.on("prices fetched", ([prices, current_price, s, rest])=>{
             let html = "";
             for(let i =0;i < prices.length;i++){
                 html += `<div style='position: absolute;bottom: 0;left: ${i * 20 + 5}px;width: 10px;background-color:${(prices[i] > prices[i - 1]) ? "Green" : "Red"};height: ${prices[i]/800}px;' title='${Number(prices[i]).toLocaleString()}'></div>`;
@@ -279,14 +278,23 @@ $(document).ready(()=>{
             
 
             $("#chart").html(html);
+        });
+    });
+    socket.on("update the damn chart", (stock)=>{
+        if(String($("#display_stocks").val()) == String(stock._id)){
+            stock.priceHistory.push(stock.price);
+            chart.data.datasets[0].data = stock.priceHistory;
+            chart.update();
+            
+        }
     });
     socket.on("info for table", (stocks)=>{
         
         let html = "";
         for(let i = 0;i < stocks.length;i++){
-            html += `<tr><td class="item-name" style="padding: 8px;">${stocks[i].name}></td><td class="price" style="padding: 8px;">${stocks[i].price.toLocaleString()}</td><td class="price" style="padding: 8px;">${stocks[i].priceHistory[stocks[i].priceHistory.length-1].toLocaleString()}</td><td style="padding: 8px;color: ${(stocks[i].price >= stocks[i].priceHistory[stocks[i].priceHistory.length - 1]) ? 'Green' : 'Red'};"><strong>${((stocks[i].price - stocks[i].priceHistory[stocks[i].priceHistory.length - 1])/(stocks[i].priceHistory[stocks[i].priceHistory.length - 1]))*100}</strong></td></tr>`
+            html += `<tr><td class="item-name" style="padding: 8px;">${stocks[i].name}></td><td class="price" style="padding: 8px;">${stocks[i].price.toLocaleString()}</td><td class="price" style="padding: 8px;">${stocks[i].priceHistory[stocks[i].priceHistory.length-1].toLocaleString()}</td><td style="padding: 8px;color: ${(stocks[i].price >= stocks[i].priceHistory[stocks[i].priceHistory.length - 1]) ? 'Green' : 'Red'};"><strong>${(((stocks[i].price - stocks[i].priceHistory[stocks[i].priceHistory.length - 1])/(stocks[i].priceHistory[stocks[i].priceHistory.length - 1]))*100).toFixed(2)}%</strong></td></tr>`
         }
-        //$("#lastUpdate").html(`آخرین بروزرسانی: ${Date.now()}`);
+        //$("#lastUpdate").html(`آخرین بروزرسانی: ${String(new DateTime().toLocaleDateString())}`);
         $("#table-body").html(html);
     });
     $(document).on("click", "#add_news", function(){
@@ -671,7 +679,7 @@ $(document).ready(()=>{
     });
 
 
-    if(window.location == "https://nasiric.onrender.com/"){
+    if(window.location == "http://127.0.0.1:8080/"){
         socket.emit("get the prices");
         socket.on("got the prices", (stock)=>{
             stock.priceHistory.push(stock.price);

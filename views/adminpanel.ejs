@@ -142,14 +142,14 @@
                     رنگ تیم: 
                 </label>
                 <div class="col-lg-10">
-                    <input type="text" class="form-control" required autocomplete="off" name="update_color_here" id="update_color_here" value="<%= teams[0].color %>">
+                    <input type="text" class="form-control" required autocomplete="off" name="update_color_here" id="update_color_here" value="<%= (teams.length > 0) ? teams[0].color : 'none' %>">
                 </div>
                 <br><br><br>
                 <label for="net_worth" class="col-lg-2">
                     ارزش تیم:
                 </label>
                 <div class="col-lg-10">
-                    <input type="text" class="form-control" required autocomplete="off" name="net_worth_update_here" id="net_worth_update_here" value="<%= teams[0].net_worth.toLocaleString() %>">
+                    <input type="text" class="form-control" required autocomplete="off" name="net_worth_update_here" id="net_worth_update_here" value="<%= (teams.length) ? teams[0].net_worth.toLocaleString() : 'none' %>">
                 </div>
                 <br><br>
                 <button type="button" name="update_team" id="update_team" class="btn btn-primary col-lg-2 col-lg-push-4">
