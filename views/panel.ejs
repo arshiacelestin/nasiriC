@@ -97,7 +97,7 @@
                 <strong>ارزش شرکت: <%= net_worth %>T</strong>
             </div>
             <br><br>
-            <div class="row" style="color: <%= color %>;float: right;">
+            <div class="row" style="color: <%= (our >= 0) ? 'green' : 'red'  %>;float: right;">
                 <strong dir="rtl">
                     سود: %<span dir="ltr"><%= our %></span>
                 </strong>

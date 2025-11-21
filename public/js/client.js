@@ -623,6 +623,11 @@ $(document).ready(()=>{
             audio.play();
         }
     });
+    socket.on("offer cannot be accepted", ([offerer, reciver, msg])=>{
+        alert(msg);
+        let audio = new Audio("notif.mp3");
+        audio.play();
+    });
     $(document).on("click", ".decline_o", function(){
         
         socket.emit("offer declined", ($(this).attr("id")));
@@ -755,6 +760,9 @@ $(document).ready(()=>{
     });
     $(document).on("click", "#rp", function(){
         socket.emit("rp", ($(this).html()));
+    });
+    $(document).on("click", "#fasten", function(){
+        socket.emit("run the cap");
     });
 });
 

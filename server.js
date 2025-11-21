@@ -21,6 +21,7 @@ const Transaction = require("./models/Transaction");
 const Info = require("./models/Info");
 const offer =  require("./models/Offer");
 const path = require("path");
+const MongoStore = require("connect-mongo")
 
 let logout = true;
 
@@ -46,11 +47,20 @@ app.set("view engine", "ejs");
 app.use(express.static("./public"));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.set("trust proxy", 1);
 app.use(session({
     secret: "supersercretkeyformysessionthatnooneknowsabout",
     resave: false,
     saveUninitialized: false,
-    cookie: {secure: false}
+    proxy: true,   // <-- IMPORTANT FOR RENDER
+    store: MongoStore.create({
+        mongoUrl: "mongodb+srv://gjouh25_db_user:Ax2Y61EolfYG4D6S@nasiric.n4sw0cd.mongodb.net/nasiriC?retryWrites=true&w=majority",
+        ttl: 5 * 60 * 60
+    }),
+    cookie: {
+        secure: false,
+        maxAge: 5 * 60 * 60 * 1000
+    }
 }));
 
 
@@ -70,7 +80,7 @@ app.get("/", async (req, res)=>{
         p_net = p_net[0].pn;
 
         p = (n-p_net)/(p_net);
-
+        /*
         let s = await TeamStock.find({
             team_id: team._id
         });
@@ -83,21 +93,41 @@ app.get("/", async (req, res)=>{
         }
         val += team.net_worth;
         let our_profit = parseFloat((((val - 5000000)/5000000)*100).toFixed(2));
+        console.log(our_profit);*/
+        //let color = "none";
+        //let sign = "";
+        
+        let tsft = await TeamStock.find({
+            team_id: team._id
+        });
+        
+        let s_ids = [];
+        let prices_map = {};
+        tsft.forEach(value => {
+            s_ids.push(value.stock_id);
+        });
+        const sthb = await Stocks.find({
+            _id: {$in: s_ids}
+        });
+        let val = 0;
+        sthb.forEach(stoc => prices_map[stoc._id] = stoc.price);
 
-        let color = "none";
-        let sign = "";
-        
-        
+        tsft.forEach(teamstoc => val += teamstoc.quantity * Number(prices_map[teamstoc.stock_id]));
+        val += team.net_worth;
         //p = (p > 0 && p != 0) ? p : -p;
 
+        
+        const our_profit = parseFloat((((val-10000000)/10000000)*100).toFixed(2));
 
-        const p_n = await pn.findOne({
+        /*const p_n = await pn.findOne({
             team_id: team._id
         });
         const ts = await TeamStock.find({
             team_id: team._id
         });
         let value = 0;
+        */
+        /*
         if(ts){
             for(let i = 0;i < ts.length;i++){
                 if(ts[i].quantity > 0){
@@ -111,8 +141,9 @@ app.get("/", async (req, res)=>{
         }else{
             p = 0;
         }
-        color = (p > 0 && p != 0) ? "Green" : "Red";
-        sign = (p > 0 && p != 0) ? "+" : "";
+        */
+        /*(color = (p > 0 && p != 0) ? "Green" : "Red";
+        sign = (p > 0 && p != 0) ? "+" : "";*/
 
         const stocks = await Stocks.find({
             name: {$ne: "دلار"}
@@ -127,7 +158,7 @@ app.get("/", async (req, res)=>{
             number_of_notifs++;
         }
 
-        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "p": p, "color": color, "sign": sign, "stocks": stocks, "non": number_of_notifs, "team_id": team._id, "DR": process.env.DR, "first": first, "other": stocks, "our": our_profit});
+        res.render("panel.ejs", {"username": req.session.user.username, "team_name": team.name, "team_color": team.color, "net_worth": n.toLocaleString(), "stocks": stocks, "non": number_of_notifs, "team_id": team._id, "DR": process.env.DR, "first": first, "other": stocks, "our": our_profit});
     }else{
         res.redirect("/login");
     }
@@ -253,43 +284,86 @@ app.get("/management-panel", async (req, res)=>{
                 team_id: team._id,    
             }
         );
-        let total_stock_quantity = 0;
+        const s_ids = [];
+        let price_map = {};
         let stock_names = [];
         let stock_prices = [];
-        for(let i = 0;i < team_stocks.length;i++){
+        let total_stock_quantity = 0;
+        team_stocks.forEach(val => s_ids.push(val.stock_id));
+        team_stocks.forEach(val => total_stock_quantity += val.quantity);
+        const stocks_bought = await Stocks.find({
+            _id: {$in: s_ids}
+        });
+        stocks_bought.forEach(val => {
+            price_map[val._id] = val.price;
+            stock_names.push(val.name);
+            stock_prices.push(val.price);
+        });
+        let net_value = 0;
+        let total = 0;
+        let profit = 0;
+        team_stocks.forEach(val => {
+            net_value += val.quantity * price_map[val.stock_id];
+        });
+        total = team.net_worth + net_value;
+        profit = parseFloat((((total-10000000)/10000000)*100).toFixed(2));
+
+        
+        
+        /*for(let i = 0;i < team_stocks.length;i++){
             const s = await Stocks.findById(team_stocks[i].stock_id);
             stock_names.push(s.name);
             stock_prices.push(s.price);
             total_stock_quantity += team_stocks[i].quantity;
-        }
+        }*/
         
 
         const transes = await Transactions.find({
             team_id: team._id
         }).sort({createdAt: -1});
+        let s_ids_t = [];
+        let trs_users = [];
+        transes.forEach(val => {
+            s_ids_t.push(val.stock_id)
+            trs_users.push(req.session.user);
+        });
+        let trss = await Stocks.find({
+            _id: {$in: s_ids_t}
+        });
         let trs_names = [];
         let trs_prices = [];
-        let trs_users = [];
-        for(let i = 0;i < transes.length;i++){
+        
+        trss.forEach(val => {
+            trs_names.push(val.name);
+            trs_prices.push(val.price);
+        });
+        
+        
+        
+        /*for(let i = 0;i < transes.length;i++){
             const trs = await Stocks.findById(transes[i].stock_id);
             const trs_user = await User.findById(transes[i].user_id);
             trs_names.push(trs.name);
             trs_prices.push(trs.price);
             trs_users.push(trs_user);
-        }
+        }*/
+        //let prices_map = {};
+        //let net_value = 0;
+        //trss.forEach(val => prices_map[val._id] = val.price);
 
-        let net_value = 0;
-        for(let i = 0;i < team_stocks.length;i++){
+        /*for(let i = 0;i < team_stocks.length;i++){
             const s = await Stocks.findById(team_stocks[i].stock_id);
             const value = s.price * team_stocks[i].quantity;
             net_value += value;
-        }
+        }*/
 
-        let profit = 0;
+        
+
+        /*let profit = 0;
         const p = await pn.findOne({team_id:team._id}).lean();
         profit = ((net_value + team.net_worth) - p.pn)/(p.pn);
         
-        profit = (Number(profit) * 100);
+        profit = (Number(profit) * 100);*/
 
         const tms = await Team.find();
 
@@ -359,8 +433,6 @@ app.get("/management-panel", async (req, res)=>{
                 recived["bs"].push(bs);
                 recived["state"].push(s);
             }
-
-
         }
 
         
@@ -405,11 +477,20 @@ app.get("/rankings", async (req, res)=>{
             const team_stocks = await TeamStock.find({
                 team_id: teams[i]._id
             });
+            let s_ids = [];
+            let price_map = {};
+            team_stocks.forEach(val => s_ids.push(val.stock_id));
+            let sth = await Stocks.find({
+                _id: {$in: s_ids}
+            });
+            sth.forEach(val => price_map[val._id] = val.price);
+            team_stocks.forEach(val => value += val.quantity * price_map[val.stock_id]);
             
-            for(let j = 0;j < team_stocks.length;j++){
+
+            /*for(let j = 0;j < team_stocks.length;j++){
                 const st = await Stocks.findById(team_stocks[j].stock_id);
                 value += (team_stocks[j].quantity * st.price);
-            }
+            }*/
             value += teams[i].net_worth;
             team_values[i] = {
                 team: teams[i],
@@ -1096,17 +1177,20 @@ io.on("connection", (socket)=>{
             }
         }else{
             let fsh = await Stocks.findById(pays_buy).lean(); // the stock that he wants to pay by
-            let tsh = await TeamStock.find({ // find the teamstock for this team-stock combo
+            let tsh = await TeamStock.findOne({ // find the teamstock for this team-stock combo
                 team_id: mt._id,
                 stock_id: fsh._id
             });
             
             if(tsh){
-                if(!(Number(tsh[0].quantity) >= Number(s.replace(/,/g, "")))){
+                if(!(Number(tsh.quantity) >= Number(s.replace(/,/g, "")))){
+                    console.log("ll11-77");
                     socket.emit("doesn't have enough of stock");
                     return;
                 }
+                console.log(";11-80");
             }else{
+                console.log("l11-81");
                 socket.emit("you don't have this anyways");
                 return;
             }
@@ -1339,13 +1423,91 @@ io.on("connection", (socket)=>{
             let d = await offer.findByIdAndDelete(o._id);
         }
     });
-    socket.on("team accepted", async (id)=>{
-        let u = await offer.findByIdAndUpdate(id, {
+    /*
+    let u = await offer.findByIdAndUpdate(id, {
             state: true
         });
         let o = await offer.findById(id).lean();
-        console.log(`o: ${o.offerer}, r: ${o.reciver}`);
+        
         io.emit("team accepted announcment", ([o.offerer, o.reciver]));
+    */
+    socket.on("team accepted", async (id)=>{
+        const off = await offer.findById(id);
+        const the_stock = await Stocks.findById(off.what_stock);
+        if(off.bos == "buy"){
+            let first_team = await Team.findById(off.reciver); // the team that will sell the_stock to the buyers aka the ones that recived the offer
+            let reciver_ts = await TeamStock.findOne({
+                team_id: first_team._id,
+                stock_id: the_stock._id
+            });
+            if(off.payment_method == "stocks"){
+                if(reciver_ts && (reciver_ts.quantity >= off.how_many)){
+                    let u = await offer.findByIdAndUpdate(id, {
+                        state: true
+                    });
+                    let o = await offer.findById(id).lean();
+                    
+                    io.emit("team accepted announcment", ([o.offerer, o.reciver]));
+                }else{ // reciver doesn't have enought stocks to give
+                    const del = await offer.findByIdAndDelete(id);
+                    io.emit("offer cannot be accepted", ([off.offerer, off.reciver, "طرف دریافت کننده سهام کافی را برای اهدا ندارد"]));
+                }
+            }else{
+                let reciver = await Team.findById(off.reciver);
+                if(reciver.net_worth >= off.payment_amount){
+                    let u = await offer.findByIdAndUpdate(id, {
+                        state: true
+                    });
+                    let o = await offer.findById(id).lean();
+                    
+                    io.emit("team accepted announcment", ([o.offerer, o.reciver]));
+                }else{ // reciver doesn't have enough money
+                    const del = await offer.findByIdAndDelete(id);
+                    io.emit("offer cannot be accepted", ([off.offerer, off.reciver, "طرف دریافت کننده نقدینگی کافی را برای اهدا ندارد"]));
+                }
+            }
+        }else{
+            let offerer = await Team.findById(off.offerer);
+            let reciver = await Team.findById(off.reciver);
+            let off_ts = await TeamStock.findOne({
+                team_id: offerer._id,
+                stock_id: off.what_stock
+            });
+            if(off_ts && (off_ts.quantity >= off.how_many)){
+                if(off.payment_method == "stocks"){
+                    let reciver_ts = await TeamStock.findOne({
+                        team_id: off.reciver,
+                        stock_id: off.pbs
+                    });
+                    if(reciver_ts && (reciver_ts.quantity >= off.payment_amount)){
+                        let u = await offer.findByIdAndUpdate(id, {
+                            state: true
+                        });
+                        let o = await offer.findById(id).lean();
+                        
+                        io.emit("team accepted announcment", ([o.offerer, o.reciver]));
+                    }else{ // reciver doesn't have enough stocks to sell
+                        const del = await offer.findByIdAndDelete(id);
+                        io.emit("offer cannot be accepted", ([off.offerer, off.reciver, "طرف دریافت کننده سهام کافی را برای اهدا ندارد"]));
+                    }
+                }else{
+                    if(reciver.net_worth >= off.payment_amount){
+                        let u = await offer.findByIdAndUpdate(id, {
+                            state: true
+                        });
+                        let o = await offer.findById(id).lean();
+                        
+                        io.emit("team accepted announcment", ([o.offerer, o.reciver]));
+                    }else{
+                        const del = await offer.findByIdAndDelete(id);
+                        io.emit("offer cannot be accepted", ([off.offerer, off.reciver, "طرف دریافت کننده نقیدنگی کافی را برای اهدا ندارد"]));
+                    }
+                }
+            }else{ // offerer didn't have enough to sell
+                const del = await offer.findByIdAndDelete(id);
+                io.emit("offer cannot be accepted", ([off.offerer, off.reciver, "طرف ارسال کننده سهام کافی را برای فروش ندارد"]));
+            }
+        }
     });
     socket.on("offer declined", async (id)=>{
         let o = await offer.findById(id);
@@ -1443,6 +1605,23 @@ io.on("connection", (socket)=>{
         }else{
             process.env.CIH = "yes";
         }
+    });
+    socket.on("run the cap", async ()=>{
+        const keep = 360;
+
+        
+        const newest = await Transactions
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(keep)
+            .select('_id');
+
+        const idsToKeep = newest.map(t => t._id);
+
+        
+        await Transactions.deleteMany({
+            _id: { $nin: idsToKeep }
+        });
     });
 });
 
